@@ -20,7 +20,7 @@ export const DSMap = ({
   center,
   zoom = 6,
   markers = [],
-  height = '350px',
+  height = '400px',
   width = '100%',
 }: MapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)

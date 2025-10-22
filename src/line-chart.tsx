@@ -56,4 +56,3 @@ export const DSLineChart = ({
     </ResponsiveContainer>
   )
 }
-// Complete sync test - Wed 22 Oct 2025 12:15:51 BST
