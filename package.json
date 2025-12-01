@@ -10,8 +10,7 @@
     "./*": "./src/*.tsx"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -21,13 +20,20 @@
     "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
-    "@ops-dss/eslint-config": "workspace:*",
-    "@ops-dss/typescript-config": "workspace:*",
+    "@ops-dss/eslint-config": "latest",
+    "@ops-dss/typescript-config": "latest",
     "@types/leaflet": "^1.9.8",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.34.0",
     "typescript": "5.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OPS-DSS/dss-charts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OPS-DSS/dss-charts/issues"
   }
 }

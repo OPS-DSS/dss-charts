@@ -32,7 +32,7 @@ export const DSLineChart = ({
   xAxisKey,
   lines,
   width = '100%',
-  height = 400,
+  height = 350,
 }: LineChartProps) => {
   return (
     <ResponsiveContainer width={width} height={height}>
