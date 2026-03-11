@@ -40,7 +40,18 @@ export const DSLineChart = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisKey} />
         <YAxis />
-        <Tooltip />
+        <Tooltip
+          labelStyle={{
+            borderRadius: '0.2em',
+            backgroundColor: 'ghostwhite',
+            padding: '0.5em',
+            color: 'grey',
+          }}
+          contentStyle={{
+            borderRadius: '0.5em',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+          }}
+        />
         <Legend />
         {lines.map((line) => (
           <Line
