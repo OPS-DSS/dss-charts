@@ -59,7 +59,7 @@ export const DSLineChart = ({
               return ''
             }
 
-            return `${Math.round(numericValue * 100) / 100}`
+            return `${numericValue.toFixed(2)}`
           }}
         />
         <Legend />
