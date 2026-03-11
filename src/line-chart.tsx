@@ -51,6 +51,16 @@ export const DSLineChart = ({
             borderRadius: '0.5em',
             boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
           }}
+          formatter={(value) => {
+            const numericValue =
+              typeof value === 'number' ? value : Number(value)
+
+            if (!Number.isFinite(numericValue)) {
+              return ''
+            }
+
+            return `${Math.round(numericValue * 100) / 100}`
+          }}
         />
         <Legend />
         {lines.map((line) => (
