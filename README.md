@@ -1,4 +1,4 @@
-# charts
+# OPS/PAHO DSS Charts
 
 Part of the DSS Health Indicators Monitoring System
 
