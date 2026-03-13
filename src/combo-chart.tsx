@@ -95,12 +95,7 @@ export const DSComboChart = ({
           domain={leftDomain}
           tickFormatter={(v) => Math.round(v).toString()}
         />
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          domain={rightDomain}
-          tickFormatter={(v) => Math.round(v).toString()}
-        />
+        <YAxis yAxisId="right" orientation="right" domain={rightDomain} hide />
         <Tooltip
           content={({ active, payload, label }) => {
             if (!active || !payload || payload.length === 0) return null
@@ -113,7 +108,7 @@ export const DSComboChart = ({
             })
             if (visible.length === 0) return null
 
-            const formatEntryValue = (entry: { value: unknown }) => {
+            const formatEntryValue = (entry: { value?: unknown }) => {
               const n =
                 typeof entry.value === 'number'
                   ? entry.value
