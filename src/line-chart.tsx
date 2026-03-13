@@ -10,6 +10,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import type {
+  NameType,
+  Payload,
+  ValueType,
+} from 'recharts/types/component/DefaultTooltipContent'
 
 export interface LineChartData {
   [key: string]: string | number
@@ -27,6 +32,56 @@ export interface LineChartProps {
   height?: number
 }
 
+interface DSChartTooltipContentProps {
+  active?: boolean
+  payload?: Array<Payload<ValueType, NameType>>
+  label?: string | number
+}
+
+const DSChartTooltipContent = ({
+  active,
+  payload,
+  label,
+}: DSChartTooltipContentProps) => {
+  if (!active || !payload || payload.length === 0) return null
+
+  const getNumericValue = (value: ValueType | undefined) => {
+    const raw = Array.isArray(value) ? value[0] : value
+    const n = typeof raw === 'number' ? raw : Number(raw)
+    return Number.isFinite(n) ? n : null
+  }
+
+  const visible = payload.filter((entry) => {
+    const n = getNumericValue(entry.value)
+    return n !== null && n !== 0
+  })
+
+  if (visible.length === 0) return null
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: '1px solid #e5e7eb',
+        borderRadius: '0.5em',
+        boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+        padding: '0.5em 0.75em',
+        fontSize: '0.875em',
+      }}
+    >
+      <p style={{ marginBottom: '0.25em', fontWeight: 600 }}>{label}</p>
+      {visible.map((entry, index) => (
+        <p
+          key={String(entry.dataKey ?? entry.name ?? index)}
+          style={{ color: entry.color, margin: '0.1em 0' }}
+        >
+          {entry.name ?? entry.dataKey}:{' '}
+          {getNumericValue(entry.value)?.toFixed(2)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 export const DSLineChart = ({
   data,
   xAxisKey,
@@ -40,28 +95,7 @@ export const DSLineChart = ({
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xAxisKey} />
         <YAxis />
-        <Tooltip
-          labelStyle={{
-            borderRadius: '0.2em',
-            backgroundColor: 'ghostwhite',
-            padding: '0.5em',
-            color: 'grey',
-          }}
-          contentStyle={{
-            borderRadius: '0.5em',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-          }}
-          formatter={(value) => {
-            const numericValue =
-              typeof value === 'number' ? value : Number(value)
-
-            if (!Number.isFinite(numericValue)) {
-              return ''
-            }
-
-            return `${numericValue.toFixed(2)}`
-          }}
-        />
+        <Tooltip content={(props) => <DSChartTooltipContent {...props} />} />
         <Legend />
         {lines.map((line) => (
           <Line

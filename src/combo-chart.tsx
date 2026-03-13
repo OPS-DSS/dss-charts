@@ -63,10 +63,7 @@ function computeSharedDomain(
   const max = Math.max(...allValues, 0)
   const pad = 0.1
 
-  return [
-    min < 0 ? min * (1 + pad) : 0,
-    max * (1 + pad),
-  ]
+  return [min < 0 ? min * (1 + pad) : 0, max * (1 + pad)]
 }
 
 export const DSComboChart = ({
@@ -105,15 +102,49 @@ export const DSComboChart = ({
           tickFormatter={(v) => Math.round(v).toString()}
         />
         <Tooltip
-          contentStyle={{
-            borderRadius: '0.5em',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-          }}
-          formatter={(value) => {
-            const numericValue =
-              typeof value === 'number' ? value : Number(value)
-            if (!Number.isFinite(numericValue)) return ''
-            return `${numericValue.toFixed(2)}`
+          content={({ active, payload, label }) => {
+            if (!active || !payload || payload.length === 0) return null
+            const visible = payload.filter((entry) => {
+              const n =
+                typeof entry.value === 'number'
+                  ? entry.value
+                  : Number(entry.value)
+              return Number.isFinite(n) && n !== 0
+            })
+            if (visible.length === 0) return null
+
+            const formatEntryValue = (entry: { value: unknown }) => {
+              const n =
+                typeof entry.value === 'number'
+                  ? entry.value
+                  : Number(entry.value)
+              return Number.isFinite(n) ? n.toFixed(2) : ''
+            }
+
+            return (
+              <div
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.5em',
+                  boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+                  padding: '0.5em 0.75em',
+                  fontSize: '0.875em',
+                }}
+              >
+                <p style={{ marginBottom: '0.25em', fontWeight: 600 }}>
+                  {label}
+                </p>
+                {visible.map((entry) => (
+                  <p
+                    key={entry.dataKey as string}
+                    style={{ color: entry.color, margin: '0.1em 0' }}
+                  >
+                    {entry.name}: {formatEntryValue(entry)}
+                  </p>
+                ))}
+              </div>
+            )
           }}
         />
         <Legend />
@@ -137,7 +168,6 @@ export const DSComboChart = ({
             stroke={line.color}
             strokeWidth={2}
             yAxisId={line.yAxisId ?? 'left'}
-            dot={false}
           />
         ))}
       </ComposedChart>
