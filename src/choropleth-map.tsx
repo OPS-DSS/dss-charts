@@ -34,6 +34,7 @@ export interface ChoroplethMapProps {
    * Defaults to "mock_value" for backwards compatibility.
    */
   valueProperty?: string
+  valueName?: string
 }
 
 export const DSChoroplethMap = ({
@@ -44,6 +45,7 @@ export const DSChoroplethMap = ({
   width = '100%',
   nameProperty = 'NAME_2',
   valueProperty = 'mock_value',
+  valueName = 'Valor',
 }: ChoroplethMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -57,9 +59,13 @@ export const DSChoroplethMap = ({
 
     const map = L.map(mapRef.current).setView(center, zoom)
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-    }).addTo(map)
+    L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png',
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      },
+    ).addTo(map)
 
     mapInstanceRef.current = map
 
@@ -124,7 +130,7 @@ export const DSChoroplethMap = ({
                   ? rawValue.toFixed(2)
                   : String(rawValue)
             popupContent.appendChild(
-              document.createTextNode(`Valor: ${displayValue}`),
+              document.createTextNode(`${valueName}: ${displayValue}`),
             )
             featureLayer.bindPopup(popupContent)
             featureLayer.on('mouseover', (e) => {
@@ -156,7 +162,7 @@ export const DSChoroplethMap = ({
       isCancelled = true
       abortController.abort()
     }
-  }, [geojsonUrl, nameProperty, valueProperty])
+  }, [geojsonUrl, nameProperty, valueProperty, valueName])
 
   return (
     <div style={{ position: 'relative', height, width }}>
