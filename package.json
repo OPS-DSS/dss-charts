@@ -1,16 +1,24 @@
 {
   "name": "@ops-dss/charts",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": false,
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "exports": {
-    "./*": "./src/*.tsx"
+    "./*": "./dist/*.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsup",
     "lint": "eslint . --max-warnings 0"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
