@@ -1,13 +1,16 @@
 {
   "name": "@ops-dss/charts",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": false,
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "exports": {
-    "./*": "./dist/*.js"
+    "./*": {
+      "import": "./dist/*.mjs",
+      "types": "./dist/*.d.mts"
+    }
   },
   "files": [
     "dist"
