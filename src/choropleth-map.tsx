@@ -17,20 +17,44 @@ export interface ChoroplethFeatureProperties {
   color?: string
 }
 
-export interface ChoroplethMapProps {
+/**
+ * Configuration for an optional base layer rendered underneath the main layer.
+ * The base layer is always visible regardless of the main layer selection.
+ */
+export interface BaseLayerConfig {
   geojsonUrl: string
+  /** Property used as the display label. Defaults to nameProperty of the parent map. */
+  nameProperty?: string
+  /** Property used as the numeric value. Defaults to "value". */
+  valueProperty?: string
+  /** Human-readable label shown in popups. */
+  valueName?: string
+}
+
+export interface ChoroplethMapProps {
+  /**
+   * Optional overlay GeoJSON URL. When provided it renders on top of the base
+   * layer at 50% opacity. When omitted, only the base layer is shown at full
+   * opacity and the base layer handles click popups.
+   */
+  geojsonUrl?: string
+  /**
+   * Optional base layer shown underneath the overlay at full opacity.
+   * Clicking a municipality shows data from both layers in the popup.
+   */
+  baseLayerConfig?: BaseLayerConfig
   /** Map centre [lat, lng]. Defaults to [2.5, -75.5]. */
   center?: [number, number]
   zoom?: number
   height?: string
   width?: string
   /**
-   * Name of the property in each feature's properties used as the display label.
+   * Name of the property used as the display label (overlay layer).
    * Defaults to "NAME_2" for backwards compatibility.
    */
   nameProperty?: string
   /**
-   * Name of the property in each feature's properties used as the numeric value.
+   * Name of the property used as the numeric value (overlay layer).
    * Defaults to "mock_value" for backwards compatibility.
    */
   valueProperty?: string
@@ -39,6 +63,7 @@ export interface ChoroplethMapProps {
 
 export const DSChoroplethMap = ({
   geojsonUrl,
+  baseLayerConfig,
   center = [2.5, -75.5],
   zoom = 8,
   height = '500px',
@@ -50,6 +75,9 @@ export const DSChoroplethMap = ({
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const geojsonLayerRef = useRef<L.GeoJSON | null>(null)
+  const baseLayerRef = useRef<L.GeoJSON | null>(null)
+  // Lookup map: municipality name -> base layer value, populated when base layer loads
+  const baseLayerDataRef = useRef<Map<string, number | null>>(new Map())
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -78,8 +106,159 @@ export const DSChoroplethMap = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // GeoJSON layer — re-runs whenever geojsonUrl, nameProperty or valueProperty changes
+  // Base layer — re-runs when the base layer URL changes
   useEffect(() => {
+    const map = mapInstanceRef.current
+
+    // If the base layer config is removed, clean up any existing base layer and data.
+    if (!baseLayerConfig) {
+      if (baseLayerRef.current) {
+        baseLayerRef.current.remove()
+        baseLayerRef.current = null
+      }
+      baseLayerDataRef.current.clear()
+      return
+    }
+
+    if (!map) return
+
+    const abortController = new AbortController()
+    let isCancelled = false
+
+    if (baseLayerRef.current) {
+      baseLayerRef.current.remove()
+      baseLayerRef.current = null
+    }
+
+    // When there is no overlay we manage the loading indicator from here
+    if (!geojsonUrl) {
+      setLoading(true)
+      setError(null)
+    }
+
+    const baseNameProp = baseLayerConfig.nameProperty ?? nameProperty
+    const baseValueProp = baseLayerConfig.valueProperty ?? 'value'
+
+    fetch(baseLayerConfig.geojsonUrl, { signal: abortController.signal })
+      .then((res) => {
+        if (!res.ok)
+          throw new Error(`No se pudo cargar el GeoJSON base (HTTP ${res.status})`)
+        return res.json()
+      })
+      .then((geojson) => {
+        if (isCancelled || !mapInstanceRef.current) return
+
+        const currentMap = mapInstanceRef.current
+
+        // Build name -> value lookup for use in overlay popups
+        const lookup = new Map<string, number | null>()
+        for (const feat of geojson.features ?? []) {
+          const props = feat.properties as ChoroplethFeatureProperties
+          const name = String(props[baseNameProp] ?? '')
+          const val = props[baseValueProp]
+          lookup.set(name, typeof val === 'number' ? val : null)
+        }
+        baseLayerDataRef.current = lookup
+
+        const layer = L.geoJSON(geojson, {
+          style: (feature) => ({
+            fillColor:
+              (feature?.properties as ChoroplethFeatureProperties)?.color ??
+              '#CCCCCC',
+            fillOpacity: 0.75,
+            color: 'white',
+            weight: 1.5,
+          }),
+          // When there is no overlay, the base layer handles all interactions
+          onEachFeature: geojsonUrl
+            ? undefined
+            : (feature, featureLayer) => {
+                const props = feature.properties as ChoroplethFeatureProperties
+                const featureName = String(props[baseNameProp] ?? '')
+                const rawValue = props[baseValueProp]
+                const displayValue =
+                  rawValue == null || rawValue === ''
+                    ? 'Sin datos'
+                    : typeof rawValue === 'number'
+                      ? (rawValue as number).toFixed(2)
+                      : String(rawValue)
+
+                const popupContent = document.createElement('div')
+                const title = document.createElement('strong')
+                title.textContent = featureName
+                popupContent.appendChild(title)
+                popupContent.appendChild(document.createElement('br'))
+                popupContent.appendChild(
+                  document.createTextNode(
+                    `${baseLayerConfig.valueName ?? 'Valor'}: ${displayValue}`,
+                  ),
+                )
+                featureLayer.bindPopup(popupContent)
+
+                featureLayer.on('mouseover', (e) => {
+                  const target = e.target as L.Path
+                  target.setStyle({ fillOpacity: 0.95, weight: 2.5 })
+                  target.bringToFront()
+                })
+                featureLayer.on('mouseout', () => {
+                  layer.resetStyle(featureLayer)
+                })
+              },
+        }).addTo(currentMap)
+
+        baseLayerRef.current = layer
+
+        if (!geojsonUrl) {
+          currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+          if (!isCancelled) setLoading(false)
+        } else if (geojsonLayerRef.current) {
+          // Ensure the overlay stays on top
+          geojsonLayerRef.current.bringToFront()
+        }
+      })
+      .catch((err: Error) => {
+        if (isCancelled) return
+        if ((err as { name?: string }).name === 'AbortError') return
+        if (!geojsonUrl) {
+          setError(err.message)
+          setLoading(false)
+        } else {
+          console.error('Base layer error:', err.message)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+      abortController.abort()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    baseLayerConfig?.geojsonUrl,
+    baseLayerConfig?.nameProperty,
+    baseLayerConfig?.valueProperty,
+    baseLayerConfig?.valueName,
+    // nameProperty is the fallback for baseNameProp when baseLayerConfig.nameProperty is unset
+    nameProperty,
+    // Re-run when overlay presence changes so popup handlers are added/removed
+    !!geojsonUrl,
+  ])
+
+  // Main (overlay) GeoJSON layer — re-runs whenever geojsonUrl changes
+  useEffect(() => {
+    if (!geojsonUrl) {
+      // Remove any stale overlay when indicator is deselected
+      if (geojsonLayerRef.current) {
+        geojsonLayerRef.current.remove()
+        geojsonLayerRef.current = null
+      }
+      // If there is no base layer either, nothing will clear the loading state
+      if (!baseLayerConfig?.geojsonUrl) {
+        setLoading(false)
+        setError(null)
+      }
+      return
+    }
+
     const map = mapInstanceRef.current
     if (!map) return
 
@@ -89,11 +268,13 @@ export const DSChoroplethMap = ({
     setLoading(true)
     setError(null)
 
-    // Remove the previous layer before fetching the new one
     if (geojsonLayerRef.current) {
       geojsonLayerRef.current.remove()
       geojsonLayerRef.current = null
     }
+
+    // Overlay renders at 50% opacity when a base layer is present
+    const overlayFillOpacity = baseLayerConfig ? 0.5 : 0.75
 
     fetch(geojsonUrl, { signal: abortController.signal })
       .then((res) => {
@@ -111,17 +292,13 @@ export const DSChoroplethMap = ({
             fillColor:
               (feature?.properties as ChoroplethFeatureProperties)?.color ??
               '#CCCCCC',
-            fillOpacity: 0.75,
+            fillOpacity: overlayFillOpacity,
             color: 'white',
             weight: 1.5,
           }),
           onEachFeature: (feature, featureLayer) => {
             const props = feature.properties as ChoroplethFeatureProperties
-            const popupContent = document.createElement('div')
-            const titleElement = document.createElement('strong')
-            titleElement.textContent = String(props[nameProperty] ?? '')
-            popupContent.appendChild(titleElement)
-            popupContent.appendChild(document.createElement('br'))
+            const featureName = String(props[nameProperty] ?? '')
             const rawValue = props[valueProperty]
             const displayValue =
               rawValue == null || rawValue === ''
@@ -129,10 +306,39 @@ export const DSChoroplethMap = ({
                 : typeof rawValue === 'number'
                   ? rawValue.toFixed(2)
                   : String(rawValue)
-            popupContent.appendChild(
-              document.createTextNode(`${valueName}: ${displayValue}`),
-            )
-            featureLayer.bindPopup(popupContent)
+
+            // Build popup dynamically at click time so base layer data is current
+            featureLayer.bindPopup(() => {
+              const container = document.createElement('div')
+
+              const title = document.createElement('strong')
+              title.textContent = featureName
+              container.appendChild(title)
+
+              // Base layer row (maternal mortality)
+              if (baseLayerConfig) {
+                const baseVal = baseLayerDataRef.current.get(featureName)
+                const baseDisplay =
+                  baseVal == null || !Number.isFinite(baseVal)
+                    ? 'Sin datos'
+                    : baseVal.toFixed(2)
+                container.appendChild(document.createElement('br'))
+                container.appendChild(
+                  document.createTextNode(
+                    `${baseLayerConfig.valueName ?? 'Capa base'}: ${baseDisplay}`,
+                  ),
+                )
+              }
+
+              // Overlay row (education indicator)
+              container.appendChild(document.createElement('br'))
+              container.appendChild(
+                document.createTextNode(`${valueName}: ${displayValue}`),
+              )
+
+              return container
+            })
+
             featureLayer.on('mouseover', (e) => {
               const target = e.target as L.Path
               target.setStyle({ fillOpacity: 0.95, weight: 2.5 })
@@ -145,15 +351,14 @@ export const DSChoroplethMap = ({
         }).addTo(currentMap)
 
         geojsonLayerRef.current = layer
+        layer.bringToFront()
         currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
 
-        if (!isCancelled) {
-          setLoading(false)
-        }
+        if (!isCancelled) setLoading(false)
       })
       .catch((err: Error) => {
         if (isCancelled) return
-        if ((err as any).name === 'AbortError') return
+        if ((err as { name?: string }).name === 'AbortError') return
         setError(err.message)
         setLoading(false)
       })
@@ -162,7 +367,8 @@ export const DSChoroplethMap = ({
       isCancelled = true
       abortController.abort()
     }
-  }, [geojsonUrl, nameProperty, valueProperty, valueName])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geojsonUrl, nameProperty, valueProperty, valueName, baseLayerConfig?.geojsonUrl])
 
   return (
     <div style={{ position: 'relative', height, width }}>

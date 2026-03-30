@@ -16,7 +16,11 @@ interface ForestPlotProps {
     height?: number;
     /** Show significance markers */
     showSignificance?: boolean;
+    /** Currently selected indicator key — highlights that row */
+    selectedIndicator?: string;
+    /** Called when user clicks an indicator row */
+    onSelectIndicator?: (indicador: string) => void;
 }
-declare const DSForestPlot: ({ data, height, width, showSignificance, }: ForestPlotProps) => react_jsx_runtime.JSX.Element;
+declare const DSForestPlot: ({ data, height, width, showSignificance, selectedIndicator, onSelectIndicator, }: ForestPlotProps) => react_jsx_runtime.JSX.Element;
 
 export { DSForestPlot, type ForestPlotProps, type ForestPlotRow };

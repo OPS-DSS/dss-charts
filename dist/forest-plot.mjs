@@ -11,20 +11,22 @@ function pStars(p) {
   if (p < 0.1) return ".";
   return "";
 }
-function getColor(r, p) {
+function getColor(r) {
   if (!Number.isFinite(r)) return "#9ca3af";
-  const sig = Number.isFinite(p) && p < 0.05;
-  if (r > 0) return sig ? "#ef4444" : "#fca5a5";
-  return sig ? "#3b82f6" : "#93c5fd";
+  if (r > 0) return "#5B7BEA";
+  if (r < 0) return "#E68632";
+  return "#9ca3af";
 }
 var DSForestPlot = ({
   data,
   height,
   width,
-  showSignificance = true
+  showSignificance = true,
+  selectedIndicator,
+  onSelectIndicator
 }) => {
   const sorted = useMemo(
-    () => [...data].filter((d) => Number.isFinite(d.correlacion)).sort((a, b) => Math.abs(b.correlacion) - Math.abs(a.correlacion)),
+    () => [...data].filter((d) => Number.isFinite(d.correlacion)).sort((a, b) => a.correlacion - b.correlacion),
     [data]
   );
   if (sorted.length === 0) {
@@ -49,7 +51,7 @@ var DSForestPlot = ({
   const dotRadius = 6;
   const ciLineWidth = 2;
   const headerHeight = 36;
-  const footerHeight = 28;
+  const footerHeight = onSelectIndicator ? 44 : 28;
   const axisHeight = 24;
   const n = sorted.length;
   const svgHeight = height ?? headerHeight + n * rowHeight + axisHeight + footerHeight;
@@ -128,93 +130,123 @@ var DSForestPlot = ({
           const cx = xPos(row.correlacion);
           const ciL = xPos(Math.max(xMin, row.ci_lower));
           const ciR = xPos(Math.min(xMax, row.ci_upper));
-          const color = getColor(row.correlacion, row.p_value);
+          const color = getColor(row.correlacion);
           const stars = showSignificance ? pStars(row.p_value) : "";
-          return /* @__PURE__ */ jsxs("g", { children: [
-            i % 2 === 0 && /* @__PURE__ */ jsx(
-              "rect",
-              {
-                x: 0,
-                y: plotAreaTop + i * rowHeight,
-                width: totalWidth,
-                height: rowHeight,
-                fill: "#f9fafb"
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "text",
-              {
-                x: labelWidth - 8,
-                y: cy + 4,
-                textAnchor: "end",
-                fontSize: 12,
-                fill: "#374151",
-                children: row.label
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "line",
-              {
-                x1: ciL,
-                x2: ciR,
-                y1: cy,
-                y2: cy,
-                stroke: color,
-                strokeWidth: ciLineWidth
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "line",
-              {
-                x1: ciL,
-                x2: ciL,
-                y1: cy - 5,
-                y2: cy + 5,
-                stroke: color,
-                strokeWidth: ciLineWidth
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "line",
-              {
-                x1: ciR,
-                x2: ciR,
-                y1: cy - 5,
-                y2: cy + 5,
-                stroke: color,
-                strokeWidth: ciLineWidth
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "circle",
-              {
-                cx,
-                cy,
-                r: dotRadius,
-                fill: color,
-                stroke: "#fff",
-                strokeWidth: 1.5
-              }
-            ),
-            /* @__PURE__ */ jsxs(
-              "text",
-              {
-                x: plotRight + plotPadRight + valueWidth / 2,
-                y: cy + 4,
-                textAnchor: "middle",
-                fontSize: 11,
-                fill: "#374151",
-                fontFamily: "monospace",
-                children: [
-                  row.correlacion.toFixed(2),
-                  stars ? /* @__PURE__ */ jsxs("tspan", { fill: "#7c3aed", fontWeight: 700, children: [
-                    " ",
-                    stars
-                  ] }) : null
-                ]
-              }
-            )
-          ] }, `${row.indicador}__${i}`);
+          const isSelected = selectedIndicator === row.indicador;
+          const isClickable = !!onSelectIndicator;
+          return /* @__PURE__ */ jsxs(
+            "g",
+            {
+              onClick: isClickable ? () => onSelectIndicator(row.indicador) : void 0,
+              onKeyDown: isClickable ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelectIndicator(row.indicador);
+                }
+              } : void 0,
+              tabIndex: isClickable ? 0 : void 0,
+              style: isClickable ? { cursor: "pointer" } : void 0,
+              role: isClickable ? "button" : void 0,
+              "aria-pressed": isClickable ? isSelected : void 0,
+              children: [
+                /* @__PURE__ */ jsx(
+                  "rect",
+                  {
+                    x: 0,
+                    y: plotAreaTop + i * rowHeight,
+                    width: totalWidth,
+                    height: rowHeight,
+                    fill: isSelected ? "#eff6ff" : i % 2 === 0 ? "#f9fafb" : "transparent"
+                  }
+                ),
+                isSelected && /* @__PURE__ */ jsx(
+                  "rect",
+                  {
+                    x: 0,
+                    y: plotAreaTop + i * rowHeight,
+                    width: 3,
+                    height: rowHeight,
+                    fill: "#3b82f6"
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "text",
+                  {
+                    x: labelWidth - 8,
+                    y: cy + 4,
+                    textAnchor: "end",
+                    fontSize: 12,
+                    fontWeight: isSelected ? 700 : 400,
+                    fill: isSelected ? "#1d4ed8" : "#374151",
+                    children: row.label
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "line",
+                  {
+                    x1: ciL,
+                    x2: ciR,
+                    y1: cy,
+                    y2: cy,
+                    stroke: color,
+                    strokeWidth: ciLineWidth
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "line",
+                  {
+                    x1: ciL,
+                    x2: ciL,
+                    y1: cy - 5,
+                    y2: cy + 5,
+                    stroke: color,
+                    strokeWidth: ciLineWidth
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "line",
+                  {
+                    x1: ciR,
+                    x2: ciR,
+                    y1: cy - 5,
+                    y2: cy + 5,
+                    stroke: color,
+                    strokeWidth: ciLineWidth
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "circle",
+                  {
+                    cx,
+                    cy,
+                    r: dotRadius,
+                    fill: color,
+                    stroke: "#fff",
+                    strokeWidth: 1.5
+                  }
+                ),
+                /* @__PURE__ */ jsxs(
+                  "text",
+                  {
+                    x: plotRight + plotPadRight + valueWidth / 2,
+                    y: cy + 4,
+                    textAnchor: "middle",
+                    fontSize: 11,
+                    fill: "#374151",
+                    fontFamily: "monospace",
+                    children: [
+                      row.correlacion.toFixed(2),
+                      stars ? /* @__PURE__ */ jsxs("tspan", { fill: "#7c3aed", fontWeight: 700, children: [
+                        " ",
+                        stars
+                      ] }) : null
+                    ]
+                  }
+                )
+              ]
+            },
+            `${row.indicador}__${i}`
+          );
         }),
         /* @__PURE__ */ jsx(
           "line",
@@ -271,6 +303,18 @@ var DSForestPlot = ({
             fontSize: 10,
             fill: "#6b7280",
             children: "* p<0.05 \xB7 ** p<0.01 \xB7 *** p<0.001"
+          }
+        ),
+        onSelectIndicator && /* @__PURE__ */ jsx(
+          "text",
+          {
+            x: plotLeft,
+            y: plotAreaBottom + axisHeight + 30,
+            textAnchor: "start",
+            fontSize: 10,
+            fill: "#9ca3af",
+            fontStyle: "italic",
+            children: "Haz clic en un indicador para seleccionarlo"
           }
         )
       ]

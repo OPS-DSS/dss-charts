@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { jsx, jsxs } from "react/jsx-runtime";
 var DSChoroplethMap = ({
   geojsonUrl,
+  baseLayerConfig,
   center = [2.5, -75.5],
   zoom = 8,
   height = "500px",
@@ -18,6 +19,8 @@ var DSChoroplethMap = ({
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const geojsonLayerRef = useRef(null);
+  const baseLayerRef = useRef(null);
+  const baseLayerDataRef = useRef(/* @__PURE__ */ new Map());
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -39,22 +42,42 @@ var DSChoroplethMap = ({
   }, []);
   useEffect(() => {
     const map = mapInstanceRef.current;
+    if (!baseLayerConfig) {
+      if (baseLayerRef.current) {
+        baseLayerRef.current.remove();
+        baseLayerRef.current = null;
+      }
+      baseLayerDataRef.current.clear();
+      return;
+    }
     if (!map) return;
     const abortController = new AbortController();
     let isCancelled = false;
-    setLoading(true);
-    setError(null);
-    if (geojsonLayerRef.current) {
-      geojsonLayerRef.current.remove();
-      geojsonLayerRef.current = null;
+    if (baseLayerRef.current) {
+      baseLayerRef.current.remove();
+      baseLayerRef.current = null;
     }
-    fetch(geojsonUrl, { signal: abortController.signal }).then((res) => {
+    if (!geojsonUrl) {
+      setLoading(true);
+      setError(null);
+    }
+    const baseNameProp = baseLayerConfig.nameProperty ?? nameProperty;
+    const baseValueProp = baseLayerConfig.valueProperty ?? "value";
+    fetch(baseLayerConfig.geojsonUrl, { signal: abortController.signal }).then((res) => {
       if (!res.ok)
-        throw new Error(`No se pudo cargar el GeoJSON (HTTP ${res.status})`);
+        throw new Error(`No se pudo cargar el GeoJSON base (HTTP ${res.status})`);
       return res.json();
     }).then((geojson) => {
       if (isCancelled || !mapInstanceRef.current) return;
       const currentMap = mapInstanceRef.current;
+      const lookup = /* @__PURE__ */ new Map();
+      for (const feat of geojson.features ?? []) {
+        const props = feat.properties;
+        const name = String(props[baseNameProp] ?? "");
+        const val = props[baseValueProp];
+        lookup.set(name, typeof val === "number" ? val : null);
+      }
+      baseLayerDataRef.current = lookup;
       const layer = L.geoJSON(geojson, {
         style: (feature) => ({
           fillColor: feature?.properties?.color ?? "#CCCCCC",
@@ -62,17 +85,21 @@ var DSChoroplethMap = ({
           color: "white",
           weight: 1.5
         }),
-        onEachFeature: (feature, featureLayer) => {
+        // When there is no overlay, the base layer handles all interactions
+        onEachFeature: geojsonUrl ? void 0 : (feature, featureLayer) => {
           const props = feature.properties;
-          const popupContent = document.createElement("div");
-          const titleElement = document.createElement("strong");
-          titleElement.textContent = String(props[nameProperty] ?? "");
-          popupContent.appendChild(titleElement);
-          popupContent.appendChild(document.createElement("br"));
-          const rawValue = props[valueProperty];
+          const featureName = String(props[baseNameProp] ?? "");
+          const rawValue = props[baseValueProp];
           const displayValue = rawValue == null || rawValue === "" ? "Sin datos" : typeof rawValue === "number" ? rawValue.toFixed(2) : String(rawValue);
+          const popupContent = document.createElement("div");
+          const title = document.createElement("strong");
+          title.textContent = featureName;
+          popupContent.appendChild(title);
+          popupContent.appendChild(document.createElement("br"));
           popupContent.appendChild(
-            document.createTextNode(`${valueName}: ${displayValue}`)
+            document.createTextNode(
+              `${baseLayerConfig.valueName ?? "Valor"}: ${displayValue}`
+            )
           );
           featureLayer.bindPopup(popupContent);
           featureLayer.on("mouseover", (e) => {
@@ -85,11 +112,114 @@ var DSChoroplethMap = ({
           });
         }
       }).addTo(currentMap);
-      geojsonLayerRef.current = layer;
-      currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
-      if (!isCancelled) {
-        setLoading(false);
+      baseLayerRef.current = layer;
+      if (!geojsonUrl) {
+        currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+        if (!isCancelled) setLoading(false);
+      } else if (geojsonLayerRef.current) {
+        geojsonLayerRef.current.bringToFront();
       }
+    }).catch((err) => {
+      if (isCancelled) return;
+      if (err.name === "AbortError") return;
+      if (!geojsonUrl) {
+        setError(err.message);
+        setLoading(false);
+      } else {
+        console.error("Base layer error:", err.message);
+      }
+    });
+    return () => {
+      isCancelled = true;
+      abortController.abort();
+    };
+  }, [
+    baseLayerConfig?.geojsonUrl,
+    baseLayerConfig?.nameProperty,
+    baseLayerConfig?.valueProperty,
+    baseLayerConfig?.valueName,
+    // nameProperty is the fallback for baseNameProp when baseLayerConfig.nameProperty is unset
+    nameProperty,
+    // Re-run when overlay presence changes so popup handlers are added/removed
+    !!geojsonUrl
+  ]);
+  useEffect(() => {
+    if (!geojsonUrl) {
+      if (geojsonLayerRef.current) {
+        geojsonLayerRef.current.remove();
+        geojsonLayerRef.current = null;
+      }
+      if (!baseLayerConfig?.geojsonUrl) {
+        setLoading(false);
+        setError(null);
+      }
+      return;
+    }
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    const abortController = new AbortController();
+    let isCancelled = false;
+    setLoading(true);
+    setError(null);
+    if (geojsonLayerRef.current) {
+      geojsonLayerRef.current.remove();
+      geojsonLayerRef.current = null;
+    }
+    const overlayFillOpacity = baseLayerConfig ? 0.5 : 0.75;
+    fetch(geojsonUrl, { signal: abortController.signal }).then((res) => {
+      if (!res.ok)
+        throw new Error(`No se pudo cargar el GeoJSON (HTTP ${res.status})`);
+      return res.json();
+    }).then((geojson) => {
+      if (isCancelled || !mapInstanceRef.current) return;
+      const currentMap = mapInstanceRef.current;
+      const layer = L.geoJSON(geojson, {
+        style: (feature) => ({
+          fillColor: feature?.properties?.color ?? "#CCCCCC",
+          fillOpacity: overlayFillOpacity,
+          color: "white",
+          weight: 1.5
+        }),
+        onEachFeature: (feature, featureLayer) => {
+          const props = feature.properties;
+          const featureName = String(props[nameProperty] ?? "");
+          const rawValue = props[valueProperty];
+          const displayValue = rawValue == null || rawValue === "" ? "Sin datos" : typeof rawValue === "number" ? rawValue.toFixed(2) : String(rawValue);
+          featureLayer.bindPopup(() => {
+            const container = document.createElement("div");
+            const title = document.createElement("strong");
+            title.textContent = featureName;
+            container.appendChild(title);
+            if (baseLayerConfig) {
+              const baseVal = baseLayerDataRef.current.get(featureName);
+              const baseDisplay = baseVal == null || !Number.isFinite(baseVal) ? "Sin datos" : baseVal.toFixed(2);
+              container.appendChild(document.createElement("br"));
+              container.appendChild(
+                document.createTextNode(
+                  `${baseLayerConfig.valueName ?? "Capa base"}: ${baseDisplay}`
+                )
+              );
+            }
+            container.appendChild(document.createElement("br"));
+            container.appendChild(
+              document.createTextNode(`${valueName}: ${displayValue}`)
+            );
+            return container;
+          });
+          featureLayer.on("mouseover", (e) => {
+            const target = e.target;
+            target.setStyle({ fillOpacity: 0.95, weight: 2.5 });
+            target.bringToFront();
+          });
+          featureLayer.on("mouseout", () => {
+            layer.resetStyle(featureLayer);
+          });
+        }
+      }).addTo(currentMap);
+      geojsonLayerRef.current = layer;
+      layer.bringToFront();
+      currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+      if (!isCancelled) setLoading(false);
     }).catch((err) => {
       if (isCancelled) return;
       if (err.name === "AbortError") return;
@@ -100,7 +230,7 @@ var DSChoroplethMap = ({
       isCancelled = true;
       abortController.abort();
     };
-  }, [geojsonUrl, nameProperty, valueProperty, valueName]);
+  }, [geojsonUrl, nameProperty, valueProperty, valueName, baseLayerConfig?.geojsonUrl]);
   return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width }, children: [
     loading && !error && /* @__PURE__ */ jsx(
       "div",

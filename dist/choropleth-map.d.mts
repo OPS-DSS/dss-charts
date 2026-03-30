@@ -12,25 +12,48 @@ interface ChoroplethFeatureProperties {
     mock_value?: number;
     color?: string;
 }
-interface ChoroplethMapProps {
+/**
+ * Configuration for an optional base layer rendered underneath the main layer.
+ * The base layer is always visible regardless of the main layer selection.
+ */
+interface BaseLayerConfig {
     geojsonUrl: string;
+    /** Property used as the display label. Defaults to nameProperty of the parent map. */
+    nameProperty?: string;
+    /** Property used as the numeric value. Defaults to "value". */
+    valueProperty?: string;
+    /** Human-readable label shown in popups. */
+    valueName?: string;
+}
+interface ChoroplethMapProps {
+    /**
+     * Optional overlay GeoJSON URL. When provided it renders on top of the base
+     * layer at 50% opacity. When omitted, only the base layer is shown at full
+     * opacity and the base layer handles click popups.
+     */
+    geojsonUrl?: string;
+    /**
+     * Optional base layer shown underneath the overlay at full opacity.
+     * Clicking a municipality shows data from both layers in the popup.
+     */
+    baseLayerConfig?: BaseLayerConfig;
     /** Map centre [lat, lng]. Defaults to [2.5, -75.5]. */
     center?: [number, number];
     zoom?: number;
     height?: string;
     width?: string;
     /**
-     * Name of the property in each feature's properties used as the display label.
+     * Name of the property used as the display label (overlay layer).
      * Defaults to "NAME_2" for backwards compatibility.
      */
     nameProperty?: string;
     /**
-     * Name of the property in each feature's properties used as the numeric value.
+     * Name of the property used as the numeric value (overlay layer).
      * Defaults to "mock_value" for backwards compatibility.
      */
     valueProperty?: string;
     valueName?: string;
 }
-declare const DSChoroplethMap: ({ geojsonUrl, center, zoom, height, width, nameProperty, valueProperty, valueName, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
+declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
 
-export { type ChoroplethFeatureProperties, type ChoroplethMapProps, DSChoroplethMap };
+export { type BaseLayerConfig, type ChoroplethFeatureProperties, type ChoroplethMapProps, DSChoroplethMap };

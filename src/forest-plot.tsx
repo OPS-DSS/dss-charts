@@ -19,6 +19,10 @@ export interface ForestPlotProps {
   height?: number
   /** Show significance markers */
   showSignificance?: boolean
+  /** Currently selected indicator key — highlights that row */
+  selectedIndicator?: string
+  /** Called when user clicks an indicator row */
+  onSelectIndicator?: (indicador: string) => void
 }
 
 function pStars(p: number): string {
@@ -30,11 +34,11 @@ function pStars(p: number): string {
   return ''
 }
 
-function getColor(r: number, p: number): string {
+function getColor(r: number): string {
   if (!Number.isFinite(r)) return '#9ca3af'
-  const sig = Number.isFinite(p) && p < 0.05
-  if (r > 0) return sig ? '#ef4444' : '#fca5a5'
-  return sig ? '#3b82f6' : '#93c5fd'
+  if (r > 0) return '#5B7BEA'
+  if (r < 0) return '#E68632'
+  return '#9ca3af'
 }
 
 export const DSForestPlot = ({
@@ -42,13 +46,15 @@ export const DSForestPlot = ({
   height,
   width,
   showSignificance = true,
+  selectedIndicator,
+  onSelectIndicator,
 }: ForestPlotProps) => {
-  // Sort by absolute correlation descending (most related first)
+  // Sort ascending by correlation value (most negative first, matches R arrange(correlacion))
   const sorted = useMemo(
     () =>
       [...data]
         .filter((d) => Number.isFinite(d.correlacion))
-        .sort((a, b) => Math.abs(b.correlacion) - Math.abs(a.correlacion)),
+        .sort((a, b) => a.correlacion - b.correlacion),
     [data],
   )
 
@@ -76,7 +82,7 @@ export const DSForestPlot = ({
   const dotRadius = 6
   const ciLineWidth = 2
   const headerHeight = 36
-  const footerHeight = 28
+  const footerHeight = onSelectIndicator ? 44 : 28
   const axisHeight = 24
 
   const n = sorted.length
@@ -166,19 +172,46 @@ export const DSForestPlot = ({
         const cx = xPos(row.correlacion)
         const ciL = xPos(Math.max(xMin, row.ci_lower))
         const ciR = xPos(Math.min(xMax, row.ci_upper))
-        const color = getColor(row.correlacion, row.p_value)
+        const color = getColor(row.correlacion)
         const stars = showSignificance ? pStars(row.p_value) : ''
+        const isSelected = selectedIndicator === row.indicador
+        const isClickable = !!onSelectIndicator
 
         return (
-          <g key={`${row.indicador}__${i}`}>
-            {/* Row background (alternating) */}
-            {i % 2 === 0 && (
+          <g
+            key={`${row.indicador}__${i}`}
+            onClick={isClickable ? () => onSelectIndicator(row.indicador) : undefined}
+            onKeyDown={
+              isClickable
+                ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSelectIndicator(row.indicador)
+                    }
+                  }
+                : undefined
+            }
+            tabIndex={isClickable ? 0 : undefined}
+            style={isClickable ? { cursor: 'pointer' } : undefined}
+            role={isClickable ? 'button' : undefined}
+            aria-pressed={isClickable ? isSelected : undefined}
+          >
+            {/* Row background: highlight if selected, else alternating */}
+            <rect
+              x={0}
+              y={plotAreaTop + i * rowHeight}
+              width={totalWidth}
+              height={rowHeight}
+              fill={isSelected ? '#eff6ff' : i % 2 === 0 ? '#f9fafb' : 'transparent'}
+            />
+            {/* Selection indicator bar */}
+            {isSelected && (
               <rect
                 x={0}
                 y={plotAreaTop + i * rowHeight}
-                width={totalWidth}
+                width={3}
                 height={rowHeight}
-                fill="#f9fafb"
+                fill="#3b82f6"
               />
             )}
 
@@ -188,7 +221,8 @@ export const DSForestPlot = ({
               y={cy + 4}
               textAnchor="end"
               fontSize={12}
-              fill="#374151"
+              fontWeight={isSelected ? 700 : 400}
+              fill={isSelected ? '#1d4ed8' : '#374151'}
             >
               {row.label}
             </text>
@@ -303,6 +337,19 @@ export const DSForestPlot = ({
           fill="#6b7280"
         >
           * p&lt;0.05 · ** p&lt;0.01 · *** p&lt;0.001
+        </text>
+      )}
+
+      {onSelectIndicator && (
+        <text
+          x={plotLeft}
+          y={plotAreaBottom + axisHeight + 30}
+          textAnchor="start"
+          fontSize={10}
+          fill="#9ca3af"
+          fontStyle="italic"
+        >
+          Haz clic en un indicador para seleccionarlo
         </text>
       )}
     </svg>
