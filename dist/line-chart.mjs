@@ -63,12 +63,13 @@ var DSLineChart = ({
   xAxisKey,
   lines,
   width = "100%",
-  height = 350
+  height = 350,
+  yAxisDomain = void 0
 }) => {
   return /* @__PURE__ */ jsx(ResponsiveContainer, { width, height, children: /* @__PURE__ */ jsxs(LineChart, { data, children: [
     /* @__PURE__ */ jsx(CartesianGrid, { strokeDasharray: "3 3" }),
     /* @__PURE__ */ jsx(XAxis, { dataKey: xAxisKey }),
-    /* @__PURE__ */ jsx(YAxis, {}),
+    /* @__PURE__ */ jsx(YAxis, { domain: yAxisDomain }),
     /* @__PURE__ */ jsx(Tooltip, { content: (props) => /* @__PURE__ */ jsx(DSChartTooltipContent, { ...props }) }),
     /* @__PURE__ */ jsx(Legend, {}),
     lines.map((line) => /* @__PURE__ */ jsx(
