@@ -18,7 +18,8 @@ var DEFAULT_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
 var DSQuintilBarChart = ({
   data,
   height = 400,
-  colors = DEFAULT_COLORS
+  colors = DEFAULT_COLORS,
+  yAxisLabel
 }) => {
   const processedData = data.map((d) => ({
     ...d,
@@ -31,20 +32,31 @@ var DSQuintilBarChart = ({
     ComposedChart,
     {
       data: processedData,
-      margin: { top: 24, right: 16, left: 8, bottom: 24 },
+      margin: { top: 24, right: 16, left: yAxisLabel ? 20 : 8, bottom: 24 },
       children: [
         /* @__PURE__ */ jsx(CartesianGrid, { strokeDasharray: "3 3" }),
         /* @__PURE__ */ jsx(
           XAxis,
           {
             dataKey: "quintil",
-            label: { value: "Quintil DSS", position: "insideBottom", offset: -12 }
+            label: {
+              value: "Quintil DSS",
+              position: "insideBottom",
+              offset: -12,
+              fontSize: 12
+            }
           }
         ),
         /* @__PURE__ */ jsx(
           YAxis,
           {
-            tickFormatter: (v) => typeof v === "number" ? v.toFixed(0) : String(v)
+            tickFormatter: (v) => typeof v === "number" ? v.toFixed(0) : String(v),
+            label: yAxisLabel ? {
+              value: yAxisLabel,
+              angle: -90,
+              position: "insideLeft",
+              fontSize: 12
+            } : void 0
           }
         ),
         /* @__PURE__ */ jsx(

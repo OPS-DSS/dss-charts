@@ -2,7 +2,7 @@
 
 // src/scatter-chart.tsx
 import { useMemo, useState } from "react";
-import { jsx, jsxs } from "react/jsx-runtime";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 function linearRegression(points) {
   const n = points.length;
   if (n < 2) return null;
@@ -209,18 +209,31 @@ var DSScatterChart = ({
             }
           )
         ] }, `yt-${i}`)),
-        regression && /* @__PURE__ */ jsx(
-          "line",
-          {
-            x1: xScale(xDom.min),
-            y1: yScale(trendY(xDom.min)),
-            x2: xScale(xDom.max),
-            y2: yScale(trendY(xDom.max)),
-            stroke: "#6b7280",
-            strokeWidth: 1.5,
-            strokeDasharray: "5 4"
-          }
-        ),
+        regression && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx(
+            "line",
+            {
+              x1: xScale(xDom.min),
+              y1: yScale(trendY(xDom.min)),
+              x2: xScale(xDom.max),
+              y2: yScale(trendY(xDom.max)),
+              stroke: "#6b7280",
+              strokeWidth: 1.5,
+              strokeDasharray: "5 4"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "text",
+            {
+              x: padLeft + plotW - 4,
+              y: padTop + 14,
+              textAnchor: "end",
+              fontSize: 10,
+              fill: "#9ca3af",
+              children: `y = ${regression.slope.toFixed(2)}x ${regression.intercept >= 0 ? "+" : "\u2212"} ${Math.abs(regression.intercept).toFixed(2)}`
+            }
+          )
+        ] }),
         validData.map((d, i) => {
           const cx = xScale(d.x);
           const cy = yScale(d.y);

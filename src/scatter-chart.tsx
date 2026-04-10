@@ -247,15 +247,26 @@ export const DSScatterChart = ({
 
       {/* Trendline */}
       {regression && (
-        <line
-          x1={xScale(xDom.min)}
-          y1={yScale(trendY(xDom.min))}
-          x2={xScale(xDom.max)}
-          y2={yScale(trendY(xDom.max))}
-          stroke="#6b7280"
-          strokeWidth={1.5}
-          strokeDasharray="5 4"
-        />
+        <>
+          <line
+            x1={xScale(xDom.min)}
+            y1={yScale(trendY(xDom.min))}
+            x2={xScale(xDom.max)}
+            y2={yScale(trendY(xDom.max))}
+            stroke="#6b7280"
+            strokeWidth={1.5}
+            strokeDasharray="5 4"
+          />
+          <text
+            x={padLeft + plotW - 4}
+            y={padTop + 14}
+            textAnchor="end"
+            fontSize={10}
+            fill="#9ca3af"
+          >
+            {`y = ${regression.slope.toFixed(2)}x ${regression.intercept >= 0 ? '+' : '−'} ${Math.abs(regression.intercept).toFixed(2)}`}
+          </text>
+        </>
       )}
 
       {/* Data points (render non-hovered first, hovered on top) */}

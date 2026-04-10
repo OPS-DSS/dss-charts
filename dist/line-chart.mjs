@@ -64,26 +64,63 @@ var DSLineChart = ({
   lines,
   width = "100%",
   height = 350,
-  yAxisDomain = void 0
+  yAxisDomain = void 0,
+  xAxisLabel,
+  yAxisLabel
 }) => {
-  return /* @__PURE__ */ jsx(ResponsiveContainer, { width, height, children: /* @__PURE__ */ jsxs(LineChart, { data, children: [
-    /* @__PURE__ */ jsx(CartesianGrid, { strokeDasharray: "3 3" }),
-    /* @__PURE__ */ jsx(XAxis, { dataKey: xAxisKey }),
-    /* @__PURE__ */ jsx(YAxis, { domain: yAxisDomain }),
-    /* @__PURE__ */ jsx(Tooltip, { content: (props) => /* @__PURE__ */ jsx(DSChartTooltipContent, { ...props }) }),
-    /* @__PURE__ */ jsx(Legend, {}),
-    lines.map((line) => /* @__PURE__ */ jsx(
-      Line,
-      {
-        type: "monotone",
-        dataKey: line.dataKey,
-        name: line.name,
-        stroke: line.color,
-        strokeWidth: 2
+  return /* @__PURE__ */ jsx(ResponsiveContainer, { width, height, children: /* @__PURE__ */ jsxs(
+    LineChart,
+    {
+      data,
+      margin: {
+        top: 5,
+        right: 5,
+        bottom: xAxisLabel ? 20 : 5,
+        left: yAxisLabel ? 20 : 5
       },
-      line.dataKey
-    ))
-  ] }) });
+      children: [
+        /* @__PURE__ */ jsx(CartesianGrid, { strokeDasharray: "3 3" }),
+        /* @__PURE__ */ jsx(
+          XAxis,
+          {
+            dataKey: xAxisKey,
+            label: xAxisLabel ? {
+              value: xAxisLabel,
+              position: "insideBottom",
+              offset: -10,
+              fontSize: 12
+            } : void 0
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          YAxis,
+          {
+            domain: yAxisDomain,
+            label: yAxisLabel ? {
+              value: yAxisLabel,
+              angle: -90,
+              position: "insideLeft",
+              offset: 20,
+              fontSize: 12
+            } : void 0
+          }
+        ),
+        /* @__PURE__ */ jsx(Tooltip, { content: (props) => /* @__PURE__ */ jsx(DSChartTooltipContent, { ...props }) }),
+        /* @__PURE__ */ jsx(Legend, { wrapperStyle: { paddingTop: "20px" } }),
+        lines.map((line) => /* @__PURE__ */ jsx(
+          Line,
+          {
+            type: "monotone",
+            dataKey: line.dataKey,
+            name: line.name,
+            stroke: line.color,
+            strokeWidth: 2
+          },
+          line.dataKey
+        ))
+      ]
+    }
+  ) });
 };
 export {
   DSLineChart

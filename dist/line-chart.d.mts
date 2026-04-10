@@ -14,7 +14,9 @@ interface LineChartProps {
     width?: number | string;
     height?: number;
     yAxisDomain?: [number, number] | undefined;
+    xAxisLabel?: string;
+    yAxisLabel?: string;
 }
-declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, }: LineChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, xAxisLabel, yAxisLabel, }: LineChartProps) => react_jsx_runtime.JSX.Element;
 
 export { DSLineChart, type LineChartData, type LineChartProps };

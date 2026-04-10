@@ -31,6 +31,8 @@ export interface LineChartProps {
   width?: number | string
   height?: number
   yAxisDomain?: [number, number] | undefined
+  xAxisLabel?: string
+  yAxisLabel?: string
 }
 
 interface DSChartTooltipContentProps {
@@ -90,15 +92,50 @@ export const DSLineChart = ({
   width = '100%',
   height = 350,
   yAxisDomain = undefined,
+  xAxisLabel,
+  yAxisLabel,
 }: LineChartProps) => {
   return (
     <ResponsiveContainer width={width} height={height}>
-      <LineChart data={data}>
+      <LineChart
+        data={data}
+        margin={{
+          top: 5,
+          right: 5,
+          bottom: xAxisLabel ? 20 : 5,
+          left: yAxisLabel ? 20 : 5,
+        }}
+      >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey={xAxisKey} />
-        <YAxis domain={yAxisDomain} />
+        <XAxis
+          dataKey={xAxisKey}
+          label={
+            xAxisLabel
+              ? {
+                  value: xAxisLabel,
+                  position: 'insideBottom',
+                  offset: -10,
+                  fontSize: 12,
+                }
+              : undefined
+          }
+        />
+        <YAxis
+          domain={yAxisDomain}
+          label={
+            yAxisLabel
+              ? {
+                  value: yAxisLabel,
+                  angle: -90,
+                  position: 'insideLeft',
+                  offset: 20,
+                  fontSize: 12,
+                }
+              : undefined
+          }
+        />
         <Tooltip content={(props) => <DSChartTooltipContent {...props} />} />
-        <Legend />
+        <Legend wrapperStyle={{ paddingTop: '20px' }} />
         {lines.map((line) => (
           <Line
             key={line.dataKey}

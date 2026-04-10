@@ -30,6 +30,8 @@ export interface CILineChartProps {
   decimals?: number
   color?: string
   height?: number
+  xAxisLabel?: string
+  yAxisLabel?: string
 }
 
 export const DSCILineChart = ({
@@ -40,6 +42,8 @@ export const DSCILineChart = ({
   decimals = 2,
   color = '#3b82f6',
   height = 350,
+  xAxisLabel,
+  yAxisLabel,
 }: CILineChartProps) => {
   // Recharts Area with a two-element array dataKey renders a band between the two values
   const areaData = data.map((d) => ({
@@ -51,13 +55,41 @@ export const DSCILineChart = ({
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart
         data={areaData}
-        margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
+        margin={{
+          top: 8,
+          right: 16,
+          left: yAxisLabel ? 20 : 8,
+          bottom: xAxisLabel ? 20 : 8,
+        }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey={xAxisKey} />
+        <XAxis
+          dataKey={xAxisKey}
+          label={
+            xAxisLabel
+              ? {
+                  value: xAxisLabel,
+                  position: 'insideBottom',
+                  offset: -10,
+                  fontSize: 12,
+                }
+              : undefined
+          }
+        />
         <YAxis
           tickFormatter={(v) =>
             typeof v === 'number' ? v.toFixed(decimals) : String(v)
+          }
+          label={
+            yAxisLabel
+              ? {
+                  value: yAxisLabel,
+                  angle: -90,
+                  position: 'insideLeft',
+                  offset: -10,
+                  fontSize: 12,
+                }
+              : undefined
           }
         />
         <Tooltip

@@ -17,7 +17,9 @@ interface CILineChartProps {
     decimals?: number;
     color?: string;
     height?: number;
+    xAxisLabel?: string;
+    yAxisLabel?: string;
 }
-declare const DSCILineChart: ({ data, xAxisKey, valueLabel, referenceLine, decimals, color, height, }: CILineChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSCILineChart: ({ data, xAxisKey, valueLabel, referenceLine, decimals, color, height, xAxisLabel, yAxisLabel, }: CILineChartProps) => react_jsx_runtime.JSX.Element;
 
 export { type CILineChartDataPoint, type CILineChartProps, DSCILineChart };

@@ -10,7 +10,8 @@ interface QuintilBarChartProps {
     data: QuintilBarChartDataPoint[];
     height?: number;
     colors?: string[];
+    yAxisLabel?: string;
 }
-declare const DSQuintilBarChart: ({ data, height, colors, }: QuintilBarChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSQuintilBarChart: ({ data, height, colors, yAxisLabel, }: QuintilBarChartProps) => react_jsx_runtime.JSX.Element;
 
 export { DSQuintilBarChart, type QuintilBarChartDataPoint, type QuintilBarChartProps };

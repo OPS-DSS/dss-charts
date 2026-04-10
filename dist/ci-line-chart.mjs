@@ -20,7 +20,9 @@ var DSCILineChart = ({
   referenceLine,
   decimals = 2,
   color = "#3b82f6",
-  height = 350
+  height = 350,
+  xAxisLabel,
+  yAxisLabel
 }) => {
   const areaData = data.map((d) => ({
     ...d,
@@ -30,14 +32,37 @@ var DSCILineChart = ({
     ComposedChart,
     {
       data: areaData,
-      margin: { top: 8, right: 16, left: 8, bottom: 8 },
+      margin: {
+        top: 8,
+        right: 16,
+        left: yAxisLabel ? 20 : 8,
+        bottom: xAxisLabel ? 20 : 8
+      },
       children: [
         /* @__PURE__ */ jsx(CartesianGrid, { strokeDasharray: "3 3" }),
-        /* @__PURE__ */ jsx(XAxis, { dataKey: xAxisKey }),
+        /* @__PURE__ */ jsx(
+          XAxis,
+          {
+            dataKey: xAxisKey,
+            label: xAxisLabel ? {
+              value: xAxisLabel,
+              position: "insideBottom",
+              offset: -10,
+              fontSize: 12
+            } : void 0
+          }
+        ),
         /* @__PURE__ */ jsx(
           YAxis,
           {
-            tickFormatter: (v) => typeof v === "number" ? v.toFixed(decimals) : String(v)
+            tickFormatter: (v) => typeof v === "number" ? v.toFixed(decimals) : String(v),
+            label: yAxisLabel ? {
+              value: yAxisLabel,
+              angle: -90,
+              position: "insideLeft",
+              offset: -10,
+              fontSize: 12
+            } : void 0
           }
         ),
         /* @__PURE__ */ jsx(

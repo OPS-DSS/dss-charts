@@ -24,6 +24,7 @@ export interface QuintilBarChartProps {
   data: QuintilBarChartDataPoint[]
   height?: number
   colors?: string[]
+  yAxisLabel?: string
 }
 
 const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
@@ -32,6 +33,7 @@ export const DSQuintilBarChart = ({
   data,
   height = 400,
   colors = DEFAULT_COLORS,
+  yAxisLabel,
 }: QuintilBarChartProps) => {
   // ErrorBar expects [negativeDeviation, positiveDeviation] from the bar value
   const processedData = data.map((d) => ({
@@ -46,16 +48,31 @@ export const DSQuintilBarChart = ({
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart
         data={processedData}
-        margin={{ top: 24, right: 16, left: 8, bottom: 24 }}
+        margin={{ top: 24, right: 16, left: yAxisLabel ? 20 : 8, bottom: 24 }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="quintil"
-          label={{ value: 'Quintil DSS', position: 'insideBottom', offset: -12 }}
+          label={{
+            value: 'Quintil DSS',
+            position: 'insideBottom',
+            offset: -12,
+            fontSize: 12,
+          }}
         />
         <YAxis
           tickFormatter={(v) =>
             typeof v === 'number' ? v.toFixed(0) : String(v)
+          }
+          label={
+            yAxisLabel
+              ? {
+                  value: yAxisLabel,
+                  angle: -90,
+                  position: 'insideLeft',
+                  fontSize: 12,
+                }
+              : undefined
           }
         />
         <Tooltip
