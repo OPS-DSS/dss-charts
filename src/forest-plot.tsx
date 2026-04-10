@@ -180,7 +180,9 @@ export const DSForestPlot = ({
         return (
           <g
             key={`${row.indicador}__${i}`}
-            onClick={isClickable ? () => onSelectIndicator(row.indicador) : undefined}
+            onClick={
+              isClickable ? () => onSelectIndicator(row.indicador) : undefined
+            }
             onKeyDown={
               isClickable
                 ? (e) => {
@@ -202,7 +204,9 @@ export const DSForestPlot = ({
               y={plotAreaTop + i * rowHeight}
               width={totalWidth}
               height={rowHeight}
-              fill={isSelected ? '#eff6ff' : i % 2 === 0 ? '#f9fafb' : 'transparent'}
+              fill={
+                isSelected ? '#eff6ff' : i % 2 === 0 ? '#f9fafb' : 'transparent'
+              }
             />
             {/* Selection indicator bar */}
             {isSelected && (
@@ -337,19 +341,6 @@ export const DSForestPlot = ({
           fill="#6b7280"
         >
           * p&lt;0.05 · ** p&lt;0.01 · *** p&lt;0.001
-        </text>
-      )}
-
-      {onSelectIndicator && (
-        <text
-          x={plotLeft}
-          y={plotAreaBottom + axisHeight + 30}
-          textAnchor="start"
-          fontSize={10}
-          fill="#9ca3af"
-          fontStyle="italic"
-        >
-          Haz clic en un indicador para seleccionarlo
         </text>
       )}
     </svg>

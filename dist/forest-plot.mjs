@@ -304,18 +304,6 @@ var DSForestPlot = ({
             fill: "#6b7280",
             children: "* p<0.05 \xB7 ** p<0.01 \xB7 *** p<0.001"
           }
-        ),
-        onSelectIndicator && /* @__PURE__ */ jsx(
-          "text",
-          {
-            x: plotLeft,
-            y: plotAreaBottom + axisHeight + 30,
-            textAnchor: "start",
-            fontSize: 10,
-            fill: "#9ca3af",
-            fontStyle: "italic",
-            children: "Haz clic en un indicador para seleccionarlo"
-          }
         )
       ]
     }
