@@ -53,7 +53,13 @@ interface ChoroplethMapProps {
      */
     valueProperty?: string;
     valueName?: string;
+    /**
+     * Optional second numeric property to show in the popup (e.g. maternal_value
+     * for bivariate maps where the primary value is an education indicator).
+     */
+    secondaryValueProperty?: string;
+    secondaryValueName?: string;
 }
-declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
+declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
 
 export { type BaseLayerConfig, type ChoroplethFeatureProperties, type ChoroplethMapProps, DSChoroplethMap };

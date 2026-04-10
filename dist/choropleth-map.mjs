@@ -14,7 +14,9 @@ var DSChoroplethMap = ({
   width = "100%",
   nameProperty = "NAME_2",
   valueProperty = "mock_value",
-  valueName = "Valor"
+  valueName = "Valor",
+  secondaryValueProperty,
+  secondaryValueName
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -101,6 +103,14 @@ var DSChoroplethMap = ({
               `${baseLayerConfig.valueName ?? "Valor"}: ${displayValue}`
             )
           );
+          if (secondaryValueProperty && secondaryValueName) {
+            const secRaw = props[secondaryValueProperty];
+            const secDisplay = secRaw == null || secRaw === "" ? "Sin datos" : typeof secRaw === "number" ? secRaw.toFixed(2) : String(secRaw);
+            popupContent.appendChild(document.createElement("br"));
+            popupContent.appendChild(
+              document.createTextNode(`${secondaryValueName}: ${secDisplay}`)
+            );
+          }
           featureLayer.bindPopup(popupContent);
           featureLayer.on("mouseover", (e) => {
             const target = e.target;
@@ -140,6 +150,9 @@ var DSChoroplethMap = ({
     baseLayerConfig?.valueName,
     // nameProperty is the fallback for baseNameProp when baseLayerConfig.nameProperty is unset
     nameProperty,
+    // Popup content depends on these; re-run so handlers always reflect latest props
+    secondaryValueProperty,
+    secondaryValueName,
     // Re-run when overlay presence changes so popup handlers are added/removed
     !!geojsonUrl
   ]);
@@ -185,7 +198,7 @@ var DSChoroplethMap = ({
           const featureName = String(props[nameProperty] ?? "");
           const rawValue = props[valueProperty];
           const displayValue = rawValue == null || rawValue === "" ? "Sin datos" : typeof rawValue === "number" ? rawValue.toFixed(2) : String(rawValue);
-          featureLayer.bindPopup(() => {
+          const buildPopup = () => {
             const container = document.createElement("div");
             const title = document.createElement("strong");
             title.textContent = featureName;
@@ -204,8 +217,21 @@ var DSChoroplethMap = ({
             container.appendChild(
               document.createTextNode(`${valueName}: ${displayValue}`)
             );
+            if (secondaryValueProperty && secondaryValueName) {
+              const secRaw = props[secondaryValueProperty];
+              const secDisplay = secRaw == null || secRaw === "" ? "Sin datos" : typeof secRaw === "number" ? secRaw.toFixed(2) : String(secRaw);
+              container.appendChild(document.createElement("br"));
+              container.appendChild(
+                document.createTextNode(`${secondaryValueName}: ${secDisplay}`)
+              );
+            }
             return container;
-          });
+          };
+          if (baseLayerConfig) {
+            featureLayer.bindPopup(buildPopup);
+          } else {
+            featureLayer.bindPopup(buildPopup());
+          }
           featureLayer.on("mouseover", (e) => {
             const target = e.target;
             target.setStyle({ fillOpacity: 0.95, weight: 2.5 });
@@ -230,7 +256,7 @@ var DSChoroplethMap = ({
       isCancelled = true;
       abortController.abort();
     };
-  }, [geojsonUrl, nameProperty, valueProperty, valueName, baseLayerConfig?.geojsonUrl]);
+  }, [geojsonUrl, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, baseLayerConfig?.geojsonUrl]);
   return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width }, children: [
     loading && !error && /* @__PURE__ */ jsx(
       "div",

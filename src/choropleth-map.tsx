@@ -59,6 +59,12 @@ export interface ChoroplethMapProps {
    */
   valueProperty?: string
   valueName?: string
+  /**
+   * Optional second numeric property to show in the popup (e.g. maternal_value
+   * for bivariate maps where the primary value is an education indicator).
+   */
+  secondaryValueProperty?: string
+  secondaryValueName?: string
 }
 
 export const DSChoroplethMap = ({
@@ -71,6 +77,8 @@ export const DSChoroplethMap = ({
   nameProperty = 'NAME_2',
   valueProperty = 'mock_value',
   valueName = 'Valor',
+  secondaryValueProperty,
+  secondaryValueName,
 }: ChoroplethMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -193,6 +201,19 @@ export const DSChoroplethMap = ({
                     `${baseLayerConfig.valueName ?? 'Valor'}: ${displayValue}`,
                   ),
                 )
+                if (secondaryValueProperty && secondaryValueName) {
+                  const secRaw = props[secondaryValueProperty]
+                  const secDisplay =
+                    secRaw == null || secRaw === ''
+                      ? 'Sin datos'
+                      : typeof secRaw === 'number'
+                        ? (secRaw as number).toFixed(2)
+                        : String(secRaw)
+                  popupContent.appendChild(document.createElement('br'))
+                  popupContent.appendChild(
+                    document.createTextNode(`${secondaryValueName}: ${secDisplay}`),
+                  )
+                }
                 featureLayer.bindPopup(popupContent)
 
                 featureLayer.on('mouseover', (e) => {
@@ -239,6 +260,9 @@ export const DSChoroplethMap = ({
     baseLayerConfig?.valueName,
     // nameProperty is the fallback for baseNameProp when baseLayerConfig.nameProperty is unset
     nameProperty,
+    // Popup content depends on these; re-run so handlers always reflect latest props
+    secondaryValueProperty,
+    secondaryValueName,
     // Re-run when overlay presence changes so popup handlers are added/removed
     !!geojsonUrl,
   ])
@@ -307,15 +331,20 @@ export const DSChoroplethMap = ({
                   ? rawValue.toFixed(2)
                   : String(rawValue)
 
-            // Build popup dynamically at click time so base layer data is current
-            featureLayer.bindPopup(() => {
+            // Helper to build the popup's DOM element.
+            // When a baseLayerConfig is present we must defer the base-layer
+            // value lookup to click time (the async base-layer fetch may not
+            // have resolved yet), so we use a factory.  In all other cases we
+            // build the element eagerly so that secondaryValueProperty is
+            // captured from the current render's closure with no stale-ref risk.
+            const buildPopup = () => {
               const container = document.createElement('div')
 
               const title = document.createElement('strong')
               title.textContent = featureName
               container.appendChild(title)
 
-              // Base layer row (maternal mortality)
+              // Base layer row (kept lazy so the lookup is always current)
               if (baseLayerConfig) {
                 const baseVal = baseLayerDataRef.current.get(featureName)
                 const baseDisplay =
@@ -330,14 +359,37 @@ export const DSChoroplethMap = ({
                 )
               }
 
-              // Overlay row (education indicator)
+              // Primary row
               container.appendChild(document.createElement('br'))
               container.appendChild(
                 document.createTextNode(`${valueName}: ${displayValue}`),
               )
 
+              // Secondary row (e.g. maternal_value in bivariate mode)
+              if (secondaryValueProperty && secondaryValueName) {
+                const secRaw = props[secondaryValueProperty]
+                const secDisplay =
+                  secRaw == null || secRaw === ''
+                    ? 'Sin datos'
+                    : typeof secRaw === 'number'
+                      ? (secRaw as number).toFixed(2)
+                      : String(secRaw)
+                container.appendChild(document.createElement('br'))
+                container.appendChild(
+                  document.createTextNode(`${secondaryValueName}: ${secDisplay}`),
+                )
+              }
+
               return container
-            })
+            }
+
+            // Use a factory only when base-layer data needs a deferred lookup;
+            // otherwise pass the pre-built element to avoid stale closures.
+            if (baseLayerConfig) {
+              featureLayer.bindPopup(buildPopup)
+            } else {
+              featureLayer.bindPopup(buildPopup())
+            }
 
             featureLayer.on('mouseover', (e) => {
               const target = e.target as L.Path
@@ -368,7 +420,7 @@ export const DSChoroplethMap = ({
       abortController.abort()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geojsonUrl, nameProperty, valueProperty, valueName, baseLayerConfig?.geojsonUrl])
+  }, [geojsonUrl, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, baseLayerConfig?.geojsonUrl])
 
   return (
     <div style={{ position: 'relative', height, width }}>
