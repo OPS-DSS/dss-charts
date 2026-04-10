@@ -67,7 +67,9 @@ var DSChoroplethMap = ({
     const baseValueProp = baseLayerConfig.valueProperty ?? "value";
     fetch(baseLayerConfig.geojsonUrl, { signal: abortController.signal }).then((res) => {
       if (!res.ok)
-        throw new Error(`No se pudo cargar el GeoJSON base (HTTP ${res.status})`);
+        throw new Error(
+          `No se pudo cargar el GeoJSON base (HTTP ${res.status})`
+        );
       return res.json();
     }).then((geojson) => {
       if (isCancelled || !mapInstanceRef.current) return;
@@ -108,7 +110,9 @@ var DSChoroplethMap = ({
             const secDisplay = secRaw == null || secRaw === "" ? "Sin datos" : typeof secRaw === "number" ? secRaw.toFixed(2) : String(secRaw);
             popupContent.appendChild(document.createElement("br"));
             popupContent.appendChild(
-              document.createTextNode(`${secondaryValueName}: ${secDisplay}`)
+              document.createTextNode(
+                `${secondaryValueName}: ${secDisplay}`
+              )
             );
           }
           featureLayer.bindPopup(popupContent);
@@ -222,7 +226,9 @@ var DSChoroplethMap = ({
               const secDisplay = secRaw == null || secRaw === "" ? "Sin datos" : typeof secRaw === "number" ? secRaw.toFixed(2) : String(secRaw);
               container.appendChild(document.createElement("br"));
               container.appendChild(
-                document.createTextNode(`${secondaryValueName}: ${secDisplay}`)
+                document.createTextNode(
+                  `${secondaryValueName}: ${secDisplay}`
+                )
               );
             }
             return container;
@@ -256,7 +262,15 @@ var DSChoroplethMap = ({
       isCancelled = true;
       abortController.abort();
     };
-  }, [geojsonUrl, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, baseLayerConfig?.geojsonUrl]);
+  }, [
+    geojsonUrl,
+    nameProperty,
+    valueProperty,
+    valueName,
+    secondaryValueProperty,
+    secondaryValueName,
+    baseLayerConfig?.geojsonUrl
+  ]);
   return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width }, children: [
     loading && !error && /* @__PURE__ */ jsx(
       "div",

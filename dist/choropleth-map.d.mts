@@ -6,7 +6,7 @@ interface ChoroplethFeatureProperties {
      */
     [key: string]: unknown;
     /**
-     * Backwards-compatible defaults for existing Huila-based usages.
+     * Backwards-compatible defaults for existing usages.
      */
     NAME_2?: string;
     mock_value?: number;

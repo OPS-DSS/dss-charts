@@ -10,7 +10,7 @@ export interface ChoroplethFeatureProperties {
    */
   [key: string]: unknown
   /**
-   * Backwards-compatible defaults for existing Huila-based usages.
+   * Backwards-compatible defaults for existing usages.
    */
   NAME_2?: string
   mock_value?: number
@@ -150,7 +150,9 @@ export const DSChoroplethMap = ({
     fetch(baseLayerConfig.geojsonUrl, { signal: abortController.signal })
       .then((res) => {
         if (!res.ok)
-          throw new Error(`No se pudo cargar el GeoJSON base (HTTP ${res.status})`)
+          throw new Error(
+            `No se pudo cargar el GeoJSON base (HTTP ${res.status})`,
+          )
         return res.json()
       })
       .then((geojson) => {
@@ -211,7 +213,9 @@ export const DSChoroplethMap = ({
                         : String(secRaw)
                   popupContent.appendChild(document.createElement('br'))
                   popupContent.appendChild(
-                    document.createTextNode(`${secondaryValueName}: ${secDisplay}`),
+                    document.createTextNode(
+                      `${secondaryValueName}: ${secDisplay}`,
+                    ),
                   )
                 }
                 featureLayer.bindPopup(popupContent)
@@ -376,7 +380,9 @@ export const DSChoroplethMap = ({
                       : String(secRaw)
                 container.appendChild(document.createElement('br'))
                 container.appendChild(
-                  document.createTextNode(`${secondaryValueName}: ${secDisplay}`),
+                  document.createTextNode(
+                    `${secondaryValueName}: ${secDisplay}`,
+                  ),
                 )
               }
 
@@ -420,7 +426,15 @@ export const DSChoroplethMap = ({
       abortController.abort()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geojsonUrl, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, baseLayerConfig?.geojsonUrl])
+  }, [
+    geojsonUrl,
+    nameProperty,
+    valueProperty,
+    valueName,
+    secondaryValueProperty,
+    secondaryValueName,
+    baseLayerConfig?.geojsonUrl,
+  ])
 
   return (
     <div style={{ position: 'relative', height, width }}>
