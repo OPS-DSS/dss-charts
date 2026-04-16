@@ -175,7 +175,7 @@ var DSForestPlot = ({
                     x: labelWidth - 8,
                     y: cy + 4,
                     textAnchor: "end",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: isSelected ? 700 : 400,
                     fill: isSelected ? "#1d4ed8" : "#374151",
                     children: row.label
