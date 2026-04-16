@@ -29,7 +29,7 @@ var DSChoroplethMap = ({
     if (!mapRef.current || mapInstanceRef.current) return;
     const map = L.map(mapRef.current).setView(center, zoom);
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png",
+      "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
       {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }
