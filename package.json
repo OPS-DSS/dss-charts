@@ -25,19 +25,19 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "react-leaflet": "^5.0.0",
-    "recharts": "^2.10.0"
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
     "@ops-dss/eslint-config": "latest",
     "@ops-dss/typescript-config": "latest",
-    "@types/leaflet": "^1.9.8",
-    "@types/node": "^22.15.3",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^22.19.17",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9.34.0",
+    "eslint": "^9.39.4",
     "tsup": "^8.5.1",
     "typescript": "5.9.2"
   },
