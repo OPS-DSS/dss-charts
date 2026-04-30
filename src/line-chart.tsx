@@ -33,6 +33,8 @@ export interface LineChartProps {
   yAxisDomain?: [number, number] | undefined
   xAxisLabel?: string
   yAxisLabel?: string
+  /** When set, draws a larger highlighted dot at this x-axis value */
+  highlightX?: string | number
 }
 
 interface DSChartTooltipContentProps {
@@ -94,6 +96,7 @@ export const DSLineChart = ({
   yAxisDomain = undefined,
   xAxisLabel,
   yAxisLabel,
+  highlightX,
 }: LineChartProps) => {
   return (
     <ResponsiveContainer width={width} height={height}>
@@ -144,6 +147,30 @@ export const DSLineChart = ({
             name={line.name}
             stroke={line.color}
             strokeWidth={2}
+            dot={(props: {
+              cx: number
+              cy: number
+              stroke: string
+              payload: LineChartData
+            }) => {
+              const { cx, cy, stroke, payload } = props
+              if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
+                return <g key={String(payload[xAxisKey])} />
+              }
+              const isHighlighted =
+                highlightX !== undefined && payload[xAxisKey] === highlightX
+              return (
+                <circle
+                  key={String(payload[xAxisKey])}
+                  cx={cx}
+                  cy={cy}
+                  r={isHighlighted ? 8 : 3}
+                  fill={stroke}
+                  stroke="white"
+                  strokeWidth={isHighlighted ? 2 : 0}
+                />
+              )
+            }}
           />
         ))}
       </LineChart>

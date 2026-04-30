@@ -64,7 +64,8 @@ var DSLineChart = ({
   height = 350,
   yAxisDomain = void 0,
   xAxisLabel,
-  yAxisLabel
+  yAxisLabel,
+  highlightX
 }) => {
   return /* @__PURE__ */ jsx(ResponsiveContainer, { width, height, children: /* @__PURE__ */ jsxs(
     LineChart,
@@ -112,7 +113,26 @@ var DSLineChart = ({
             dataKey: line.dataKey,
             name: line.name,
             stroke: line.color,
-            strokeWidth: 2
+            strokeWidth: 2,
+            dot: (props) => {
+              const { cx, cy, stroke, payload } = props;
+              if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
+                return /* @__PURE__ */ jsx("g", {}, String(payload[xAxisKey]));
+              }
+              const isHighlighted = highlightX !== void 0 && payload[xAxisKey] === highlightX;
+              return /* @__PURE__ */ jsx(
+                "circle",
+                {
+                  cx,
+                  cy,
+                  r: isHighlighted ? 8 : 3,
+                  fill: stroke,
+                  stroke: "white",
+                  strokeWidth: isHighlighted ? 2 : 0
+                },
+                String(payload[xAxisKey])
+              );
+            }
           },
           line.dataKey
         ))

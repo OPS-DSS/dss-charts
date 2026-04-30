@@ -16,7 +16,9 @@ interface LineChartProps {
     yAxisDomain?: [number, number] | undefined;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    /** When set, draws a larger highlighted dot at this x-axis value */
+    highlightX?: string | number;
 }
-declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, xAxisLabel, yAxisLabel, }: LineChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, xAxisLabel, yAxisLabel, highlightX, }: LineChartProps) => react_jsx_runtime.JSX.Element;
 
 export { DSLineChart, type LineChartData, type LineChartProps };
