@@ -107,7 +107,7 @@ var DSForestPlot = ({
             fontSize: 11,
             fontWeight: 600,
             fill: "#374151",
-            children: "\u03C1 (IC)"
+            children: "\u03C1"
           }
         ),
         ticks.map((t) => /* @__PURE__ */ jsx(
@@ -154,7 +154,8 @@ var DSForestPlot = ({
                     y: plotAreaTop + i * rowHeight,
                     width: totalWidth,
                     height: rowHeight,
-                    fill: isSelected ? "#eff6ff" : i % 2 === 0 ? "#f9fafb" : "transparent"
+                    fill: isSelected ? "#eff6ff" : i % 2 === 0 ? "#f9fafb" : "transparent",
+                    style: { mixBlendMode: "multiply" }
                   }
                 ),
                 isSelected && /* @__PURE__ */ jsx(

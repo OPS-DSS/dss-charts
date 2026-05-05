@@ -149,7 +149,7 @@ export const DSForestPlot = ({
         fontWeight={600}
         fill="#374151"
       >
-        ρ (IC)
+        ρ
       </text>
 
       {/* ── Grid lines ── */}
@@ -207,6 +207,7 @@ export const DSForestPlot = ({
               fill={
                 isSelected ? '#eff6ff' : i % 2 === 0 ? '#f9fafb' : 'transparent'
               }
+              style={{ mixBlendMode: 'multiply' }}
             />
             {/* Selection indicator bar */}
             {isSelected && (
