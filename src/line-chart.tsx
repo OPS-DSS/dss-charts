@@ -104,14 +104,15 @@ export const DSLineChart = ({
         data={data}
         margin={{
           top: 5,
-          right: 5,
+          right: 10,
           bottom: xAxisLabel ? 20 : 5,
-          left: yAxisLabel ? 20 : 5,
+          left: yAxisLabel ? 10 : 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey={xAxisKey}
+          fontSize={12}
           label={
             xAxisLabel
               ? {
@@ -125,13 +126,14 @@ export const DSLineChart = ({
         />
         <YAxis
           domain={yAxisDomain}
+          fontSize={12}
           label={
             yAxisLabel
               ? {
                   value: yAxisLabel,
                   angle: -90,
                   position: 'insideLeft',
-                  offset: 20,
+                  offset: 10,
                   fontSize: 12,
                 }
               : undefined
