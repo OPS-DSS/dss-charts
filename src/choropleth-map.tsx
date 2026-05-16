@@ -437,7 +437,7 @@ export const DSChoroplethMap = ({
   ])
 
   return (
-    <div style={{ position: 'relative', height, width }}>
+    <div style={{ position: 'relative', height, width, isolation: 'isolate' }}>
       {loading && !error && (
         <div
           style={{

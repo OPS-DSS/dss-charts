@@ -269,7 +269,7 @@ var DSChoroplethMap = ({
     secondaryValueName,
     baseLayerConfig?.geojsonUrl
   ]);
-  return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width }, children: [
+  return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width, isolation: "isolate" }, children: [
     loading && !error && /* @__PURE__ */ jsx(
       "div",
       {
