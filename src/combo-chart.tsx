@@ -38,6 +38,9 @@ export interface ComboChartProps {
   bars: BarConfig[]
   height?: number
   alignZeroAxes?: boolean
+  highlightX?: string | number
+  showRightAxis?: boolean
+  rightAxisTickFormatter?: (v: number) => string
 }
 
 /**
@@ -73,6 +76,9 @@ export const DSComboChart = ({
   bars,
   height = 400,
   alignZeroAxes = false,
+  highlightX,
+  showRightAxis = false,
+  rightAxisTickFormatter = (v) => (Number.isInteger(v) ? v.toString() : v.toFixed(1)),
 }: ComboChartProps) => {
   let leftDomain: [number, number] | undefined
   let rightDomain: [number, number] | undefined
@@ -95,7 +101,13 @@ export const DSComboChart = ({
           domain={leftDomain}
           tickFormatter={(v) => Math.round(v).toString()}
         />
-        <YAxis yAxisId="right" orientation="right" domain={rightDomain} hide />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          domain={rightDomain}
+          hide={!showRightAxis}
+          tickFormatter={rightAxisTickFormatter}
+        />
         <Tooltip
           content={({ active, payload, label }) => {
             if (!active || !payload || payload.length === 0) return null
@@ -144,6 +156,15 @@ export const DSComboChart = ({
         />
         <Legend />
         <ReferenceLine yAxisId="left" y={0} stroke="#9ca3af" strokeWidth={1} />
+        {highlightX !== undefined && (
+          <ReferenceLine
+            yAxisId="left"
+            x={highlightX}
+            stroke="#374151"
+            strokeWidth={2}
+            strokeDasharray="4 2"
+          />
+        )}
         {bars.map((bar) => (
           <Bar
             key={bar.dataKey}

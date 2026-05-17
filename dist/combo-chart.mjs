@@ -1,7 +1,7 @@
 "use client";
 import {
   DSComboChart
-} from "./chunk-GGSK3AZA.mjs";
+} from "./chunk-IQTUQBIG.mjs";
 export {
   DSComboChart
 };

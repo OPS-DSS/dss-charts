@@ -28,7 +28,10 @@ var DSComboChart = ({
   lines,
   bars,
   height = 400,
-  alignZeroAxes = false
+  alignZeroAxes = false,
+  highlightX,
+  showRightAxis = false,
+  rightAxisTickFormatter = (v) => Number.isInteger(v) ? v.toString() : v.toFixed(1)
 }) => {
   let leftDomain;
   let rightDomain;
@@ -50,7 +53,16 @@ var DSComboChart = ({
         tickFormatter: (v) => Math.round(v).toString()
       }
     ),
-    /* @__PURE__ */ jsx(YAxis, { yAxisId: "right", orientation: "right", domain: rightDomain, hide: true }),
+    /* @__PURE__ */ jsx(
+      YAxis,
+      {
+        yAxisId: "right",
+        orientation: "right",
+        domain: rightDomain,
+        hide: !showRightAxis,
+        tickFormatter: rightAxisTickFormatter
+      }
+    ),
     /* @__PURE__ */ jsx(
       Tooltip,
       {
@@ -98,6 +110,16 @@ var DSComboChart = ({
     ),
     /* @__PURE__ */ jsx(Legend, {}),
     /* @__PURE__ */ jsx(ReferenceLine, { yAxisId: "left", y: 0, stroke: "#9ca3af", strokeWidth: 1 }),
+    highlightX !== void 0 && /* @__PURE__ */ jsx(
+      ReferenceLine,
+      {
+        yAxisId: "left",
+        x: highlightX,
+        stroke: "#374151",
+        strokeWidth: 2,
+        strokeDasharray: "4 2"
+      }
+    ),
     bars.map((bar) => /* @__PURE__ */ jsx(
       Bar,
       {
