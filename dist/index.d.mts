@@ -1,5 +1,6 @@
 export { BaseLayerConfig, ChoroplethFeatureProperties, ChoroplethMapProps, DSChoroplethMap } from './choropleth-map.mjs';
 export { BarConfig, ComboChartData, ComboChartProps, DSComboChart, LineConfig } from './combo-chart.mjs';
+export { DSGapBarChart, GapBarChartDataPoint, GapBarChartProps } from './gap-bar-chart.mjs';
 export { DSLineChart, LineChartData, LineChartProps } from './line-chart.mjs';
 export { DSQuintilBarChart, QuintilBarChartDataPoint, QuintilBarChartProps } from './quintil-bar-chart.mjs';
 export { CILineChartDataPoint, CILineChartProps, DSCILineChart } from './ci-line-chart.mjs';

@@ -1,5 +1,6 @@
 export * from './choropleth-map'
 export * from './combo-chart'
+export * from './gap-bar-chart'
 export * from './line-chart'
 export * from './quintil-bar-chart'
 export * from './ci-line-chart'
