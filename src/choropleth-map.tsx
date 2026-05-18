@@ -65,6 +65,8 @@ export interface ChoroplethMapProps {
    */
   secondaryValueProperty?: string
   secondaryValueName?: string
+  /** Optional formatter for the primary numeric value in popups. Defaults to two decimal places. */
+  valueFormatter?: (value: number) => string
 }
 
 export const DSChoroplethMap = ({
@@ -79,6 +81,7 @@ export const DSChoroplethMap = ({
   valueName = 'Valor',
   secondaryValueProperty,
   secondaryValueName,
+  valueFormatter = (v: number) => v.toFixed(2),
 }: ChoroplethMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -332,7 +335,7 @@ export const DSChoroplethMap = ({
               rawValue == null || rawValue === ''
                 ? 'Sin datos'
                 : typeof rawValue === 'number'
-                  ? rawValue.toFixed(2)
+                  ? valueFormatter(rawValue)
                   : String(rawValue)
 
             // Helper to build the popup's DOM element.

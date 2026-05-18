@@ -14,7 +14,8 @@ var DSChoroplethMap = ({
   valueProperty = "mock_value",
   valueName = "Valor",
   secondaryValueProperty,
-  secondaryValueName
+  secondaryValueName,
+  valueFormatter = (v) => v.toFixed(2)
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -199,7 +200,7 @@ var DSChoroplethMap = ({
           const props = feature.properties;
           const featureName = String(props[nameProperty] ?? "");
           const rawValue = props[valueProperty];
-          const displayValue = rawValue == null || rawValue === "" ? "Sin datos" : typeof rawValue === "number" ? rawValue.toFixed(2) : String(rawValue);
+          const displayValue = rawValue == null || rawValue === "" ? "Sin datos" : typeof rawValue === "number" ? valueFormatter(rawValue) : String(rawValue);
           const buildPopup = () => {
             const container = document.createElement("div");
             const title = document.createElement("strong");

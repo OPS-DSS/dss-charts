@@ -59,7 +59,9 @@ interface ChoroplethMapProps {
      */
     secondaryValueProperty?: string;
     secondaryValueName?: string;
+    /** Optional formatter for the primary numeric value in popups. Defaults to two decimal places. */
+    valueFormatter?: (value: number) => string;
 }
-declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
+declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, valueFormatter, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
 
 export { type BaseLayerConfig, type ChoroplethFeatureProperties, type ChoroplethMapProps, DSChoroplethMap };
