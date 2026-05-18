@@ -1,7 +1,7 @@
 "use client";
 import {
   DSLineChart
-} from "./chunk-IOJHS5MW.mjs";
+} from "./chunk-4JD55IIJ.mjs";
 export {
   DSLineChart
 };

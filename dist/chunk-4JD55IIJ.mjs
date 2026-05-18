@@ -100,7 +100,7 @@ var DSLineChart = ({
             label: yAxisLabel ? {
               value: yAxisLabel,
               angle: -90,
-              position: "insideLeft",
+              position: "insideBottomLeft",
               offset: 10,
               fontSize: 12
             } : void 0
