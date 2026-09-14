@@ -98,9 +98,9 @@ export const DSChoroplethMap = ({
 
     const map = L.map(mapRef.current).setView(center, zoom)
 
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png', {
       attribution:
-        'Tiles &copy; Esri; Source: U.S. National Park Service',
+        '&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap contributors',
     }).addTo(map)
 
     mapInstanceRef.current = map
