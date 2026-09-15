@@ -67,6 +67,8 @@ export interface ChoroplethMapProps {
   secondaryValueName?: string
   /** Optional formatter for the primary numeric value in popups. Defaults to two decimal places. */
   valueFormatter?: (value: number) => string
+  /** Fit the map to loaded GeoJSON bounds. Defaults to true. */
+  fitBounds?: boolean
 }
 
 export const DSChoroplethMap = ({
@@ -82,6 +84,7 @@ export const DSChoroplethMap = ({
   secondaryValueProperty,
   secondaryValueName,
   valueFormatter = (v: number) => v.toFixed(2),
+  fitBounds = true,
 }: ChoroplethMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -234,7 +237,7 @@ export const DSChoroplethMap = ({
         baseLayerRef.current = layer
 
         if (!geojsonUrl) {
-          currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+          if (fitBounds) currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
           if (!isCancelled) setLoading(false)
         } else if (geojsonLayerRef.current) {
           // Ensure the overlay stays on top
@@ -434,6 +437,7 @@ export const DSChoroplethMap = ({
     secondaryValueProperty,
     secondaryValueName,
     baseLayerConfig?.geojsonUrl,
+    fitBounds,
   ])
 
   return (
