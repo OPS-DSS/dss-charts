@@ -8,6 +8,7 @@ var DSChoroplethMap = ({
   baseLayerConfig,
   center = [2.5, -75.5],
   zoom = 8,
+  autoFit = true,
   height = "500px",
   width = "100%",
   nameProperty = "NAME_2",
@@ -28,9 +29,9 @@ var DSChoroplethMap = ({
     if (!mapRef.current || mapInstanceRef.current) return;
     const map = L.map(mapRef.current).setView(center, zoom);
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+      "https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png",
       {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attribution: "&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap contributors"
       }
     ).addTo(map);
     mapInstanceRef.current = map;
@@ -41,6 +42,11 @@ var DSChoroplethMap = ({
       }
     };
   }, []);
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || autoFit) return;
+    map.setView(center, zoom);
+  }, [center, zoom, autoFit]);
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!baseLayerConfig) {
@@ -127,7 +133,9 @@ var DSChoroplethMap = ({
       }).addTo(currentMap);
       baseLayerRef.current = layer;
       if (!geojsonUrl) {
-        currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+        if (autoFit) {
+          currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+        }
         if (!isCancelled) setLoading(false);
       } else if (geojsonLayerRef.current) {
         geojsonLayerRef.current.bringToFront();
@@ -157,7 +165,8 @@ var DSChoroplethMap = ({
     secondaryValueProperty,
     secondaryValueName,
     // Re-run when overlay presence changes so popup handlers are added/removed
-    !!geojsonUrl
+    !!geojsonUrl,
+    autoFit
   ]);
   useEffect(() => {
     if (!geojsonUrl) {
@@ -249,7 +258,9 @@ var DSChoroplethMap = ({
       }).addTo(currentMap);
       geojsonLayerRef.current = layer;
       layer.bringToFront();
-      currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+      if (autoFit) {
+        currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] });
+      }
       if (!isCancelled) setLoading(false);
     }).catch((err) => {
       if (isCancelled) return;
@@ -268,7 +279,8 @@ var DSChoroplethMap = ({
     valueName,
     secondaryValueProperty,
     secondaryValueName,
-    baseLayerConfig?.geojsonUrl
+    baseLayerConfig?.geojsonUrl,
+    autoFit
   ]);
   return /* @__PURE__ */ jsxs("div", { style: { position: "relative", height, width, isolation: "isolate" }, children: [
     loading && !error && /* @__PURE__ */ jsx(

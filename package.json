@@ -1,6 +1,6 @@
 {
   "name": "@ops-dss/charts",
-  "version": "0.1.27",
+  "version": "0.1.29",
   "private": false,
   "publishConfig": {
     "access": "public",
@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "dev": "tsup --watch",
     "lint": "eslint . --max-warnings 0"
   },
   "peerDependencies": {
@@ -35,8 +36,8 @@
     "recharts": "^2.15.4"
   },
   "devDependencies": {
-    "@ops-dss/eslint-config": "latest",
-    "@ops-dss/typescript-config": "latest",
+    "@ops-dss/eslint-config": "^0.0.1",
+    "@ops-dss/typescript-config": "^0.0.2",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^22.19.17",
     "@types/react": "^19.2.14",

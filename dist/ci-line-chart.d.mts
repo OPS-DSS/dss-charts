@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface CILineChartDataPoint {
     x: number | string;
@@ -20,6 +20,6 @@ interface CILineChartProps {
     xAxisLabel?: string;
     yAxisLabel?: string;
 }
-declare const DSCILineChart: ({ data, xAxisKey, valueLabel, referenceLine, decimals, color, height, xAxisLabel, yAxisLabel, }: CILineChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSCILineChart: ({ data, xAxisKey, valueLabel, referenceLine, decimals, color, height, xAxisLabel, yAxisLabel, }: CILineChartProps) => react.JSX.Element;
 
 export { type CILineChartDataPoint, type CILineChartProps, DSCILineChart };

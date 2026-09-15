@@ -1,7 +1,7 @@
 "use client";
 import {
   DSChoroplethMap
-} from "./chunk-PUUTAKVJ.mjs";
+} from "./chunk-UIMERUFS.mjs";
 export {
   DSChoroplethMap
 };

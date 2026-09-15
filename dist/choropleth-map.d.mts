@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface ChoroplethFeatureProperties {
     /**
@@ -40,6 +40,12 @@ interface ChoroplethMapProps {
     /** Map centre [lat, lng]. Defaults to [2.5, -75.5]. */
     center?: [number, number];
     zoom?: number;
+    /**
+     * When true (default), the map automatically re-fits its viewport to the
+     * bounds of whichever layer just loaded, overriding `center`/`zoom` after
+     * the initial mount. Set to false to keep `center`/`zoom` fixed instead.
+     */
+    autoFit?: boolean;
     height?: string;
     width?: string;
     /**
@@ -62,6 +68,6 @@ interface ChoroplethMapProps {
     /** Optional formatter for the primary numeric value in popups. Defaults to two decimal places. */
     valueFormatter?: (value: number) => string;
 }
-declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, height, width, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, valueFormatter, }: ChoroplethMapProps) => react_jsx_runtime.JSX.Element;
+declare const DSChoroplethMap: ({ geojsonUrl, baseLayerConfig, center, zoom, autoFit, height, width, nameProperty, valueProperty, valueName, secondaryValueProperty, secondaryValueName, valueFormatter, }: ChoroplethMapProps) => react.JSX.Element;
 
 export { type BaseLayerConfig, type ChoroplethFeatureProperties, type ChoroplethMapProps, DSChoroplethMap };

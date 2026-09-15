@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface QuintilBarChartDataPoint {
     quintil: number;
@@ -12,6 +12,6 @@ interface QuintilBarChartProps {
     colors?: string[];
     yAxisLabel?: string;
 }
-declare const DSQuintilBarChart: ({ data, height, colors, yAxisLabel, }: QuintilBarChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSQuintilBarChart: ({ data, height, colors, yAxisLabel, }: QuintilBarChartProps) => react.JSX.Element;
 
 export { DSQuintilBarChart, type QuintilBarChartDataPoint, type QuintilBarChartProps };

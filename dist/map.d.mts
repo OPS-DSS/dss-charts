@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface MapProps {
     center: [number, number];
@@ -11,6 +11,6 @@ interface MapProps {
     height?: string;
     width?: string;
 }
-declare const DSMap: ({ center, zoom, markers, height, width, }: MapProps) => react_jsx_runtime.JSX.Element;
+declare const DSMap: ({ center, zoom, markers, height, width, }: MapProps) => react.JSX.Element;
 
 export { DSMap, type MapProps };

@@ -46,6 +46,12 @@ export interface ChoroplethMapProps {
   /** Map centre [lat, lng]. Defaults to [2.5, -75.5]. */
   center?: [number, number]
   zoom?: number
+  /**
+   * When true (default), the map automatically re-fits its viewport to the
+   * bounds of whichever layer just loaded, overriding `center`/`zoom` after
+   * the initial mount. Set to false to keep `center`/`zoom` fixed instead.
+   */
+  autoFit?: boolean
   height?: string
   width?: string
   /**
@@ -67,8 +73,6 @@ export interface ChoroplethMapProps {
   secondaryValueName?: string
   /** Optional formatter for the primary numeric value in popups. Defaults to two decimal places. */
   valueFormatter?: (value: number) => string
-  /** Fit the map to loaded GeoJSON bounds. Defaults to true. */
-  fitBounds?: boolean
 }
 
 export const DSChoroplethMap = ({
@@ -76,6 +80,7 @@ export const DSChoroplethMap = ({
   baseLayerConfig,
   center = [2.5, -75.5],
   zoom = 8,
+  autoFit = true,
   height = '500px',
   width = '100%',
   nameProperty = 'NAME_2',
@@ -84,7 +89,6 @@ export const DSChoroplethMap = ({
   secondaryValueProperty,
   secondaryValueName,
   valueFormatter = (v: number) => v.toFixed(2),
-  fitBounds = true,
 }: ChoroplethMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
@@ -101,10 +105,13 @@ export const DSChoroplethMap = ({
 
     const map = L.map(mapRef.current).setView(center, zoom)
 
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap contributors',
-    }).addTo(map)
+    L.tileLayer(
+      'https://tiles.stadiamaps.com/tiles/stamen_toner_background/{z}/{x}/{y}{r}.png',
+      {
+        attribution:
+          '&copy; Stadia Maps &copy; Stamen Design &copy; OpenMapTiles &copy; OpenStreetMap contributors',
+      },
+    ).addTo(map)
 
     mapInstanceRef.current = map
 
@@ -116,6 +123,14 @@ export const DSChoroplethMap = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Keeps the map view pinned to center/zoom when autoFit is disabled,
+  // since fitBounds() below would otherwise override them on every load.
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!map || autoFit) return
+    map.setView(center, zoom)
+  }, [center, zoom, autoFit])
 
   // Base layer — re-runs when the base layer URL changes
   useEffect(() => {
@@ -237,7 +252,9 @@ export const DSChoroplethMap = ({
         baseLayerRef.current = layer
 
         if (!geojsonUrl) {
-          if (fitBounds) currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+          if (autoFit) {
+            currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+          }
           if (!isCancelled) setLoading(false)
         } else if (geojsonLayerRef.current) {
           // Ensure the overlay stays on top
@@ -272,6 +289,7 @@ export const DSChoroplethMap = ({
     secondaryValueName,
     // Re-run when overlay presence changes so popup handlers are added/removed
     !!geojsonUrl,
+    autoFit,
   ])
 
   // Main (overlay) GeoJSON layer — re-runs whenever geojsonUrl changes
@@ -413,7 +431,9 @@ export const DSChoroplethMap = ({
 
         geojsonLayerRef.current = layer
         layer.bringToFront()
-        currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+        if (autoFit) {
+          currentMap.fitBounds(layer.getBounds(), { padding: [16, 16] })
+        }
 
         if (!isCancelled) setLoading(false)
       })
@@ -437,7 +457,7 @@ export const DSChoroplethMap = ({
     secondaryValueProperty,
     secondaryValueName,
     baseLayerConfig?.geojsonUrl,
-    fitBounds,
+    autoFit,
   ])
 
   return (

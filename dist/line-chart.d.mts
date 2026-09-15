@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface LineChartData {
     [key: string]: string | number;
@@ -19,6 +19,6 @@ interface LineChartProps {
     /** When set, draws a larger highlighted dot at this x-axis value */
     highlightX?: string | number;
 }
-declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, xAxisLabel, yAxisLabel, highlightX, }: LineChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSLineChart: ({ data, xAxisKey, lines, width, height, yAxisDomain, xAxisLabel, yAxisLabel, highlightX, }: LineChartProps) => react.JSX.Element;
 
 export { DSLineChart, type LineChartData, type LineChartProps };

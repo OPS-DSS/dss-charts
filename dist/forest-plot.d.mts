@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface ForestPlotRow {
     indicador: string;
@@ -21,6 +21,6 @@ interface ForestPlotProps {
     /** Called when user clicks an indicator row */
     onSelectIndicator?: (indicador: string) => void;
 }
-declare const DSForestPlot: ({ data, height, width, showSignificance, selectedIndicator, onSelectIndicator, }: ForestPlotProps) => react_jsx_runtime.JSX.Element;
+declare const DSForestPlot: ({ data, height, width, showSignificance, selectedIndicator, onSelectIndicator, }: ForestPlotProps) => react.JSX.Element;
 
 export { DSForestPlot, type ForestPlotProps, type ForestPlotRow };

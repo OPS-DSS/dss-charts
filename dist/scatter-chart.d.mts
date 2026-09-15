@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface ScatterPoint {
     x: number;
@@ -18,6 +18,6 @@ interface DSScatterChartProps {
      *  0 = no labels, 1 = label all. Defaults to 0.15. */
     labelFraction?: number;
 }
-declare const DSScatterChart: ({ data, xLabel, yLabel, height, width, labelFraction, }: DSScatterChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSScatterChart: ({ data, xLabel, yLabel, height, width, labelFraction, }: DSScatterChartProps) => react.JSX.Element;
 
 export { DSScatterChart, type DSScatterChartProps, type ScatterPoint };

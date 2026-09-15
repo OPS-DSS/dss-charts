@@ -1,4 +1,4 @@
-import * as react_jsx_runtime from 'react/jsx-runtime';
+import * as react from 'react';
 
 interface GapBarChartDataPoint {
     anio: number;
@@ -16,6 +16,6 @@ interface GapBarChartProps {
     decimalPlaces?: number;
     referenceLine?: number;
 }
-declare const DSGapBarChart: ({ data, color, highlightYear, height, yAxisLabel, name, decimalPlaces, referenceLine, }: GapBarChartProps) => react_jsx_runtime.JSX.Element;
+declare const DSGapBarChart: ({ data, color, highlightYear, height, yAxisLabel, name, decimalPlaces, referenceLine, }: GapBarChartProps) => react.JSX.Element;
 
 export { DSGapBarChart, type GapBarChartDataPoint, type GapBarChartProps };
