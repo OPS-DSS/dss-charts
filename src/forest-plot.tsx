@@ -34,6 +34,21 @@ function pStars(p: number): string {
   return ''
 }
 
+function wrapLabel(label: string, maxChars = 30): string[] {
+  if (label.length <= maxChars) return [label]
+  const words = label.split(/\s+/)
+  let first = ''
+  let second = ''
+  for (const word of words) {
+    if (!second && (first ? first.length + 1 + word.length : word.length) <= maxChars) {
+      first = first ? `${first} ${word}` : word
+    } else {
+      second = second ? `${second} ${word}` : word
+    }
+  }
+  return second ? [first, second] : [first]
+}
+
 function getColor(r: number): string {
   if (!Number.isFinite(r)) return '#9ca3af'
   if (r > 0) return '#5B7BEA'
@@ -74,11 +89,11 @@ export const DSForestPlot = ({
   }
 
   // Layout constants
-  const labelWidth = 180
+  const labelWidth = 200
   const valueWidth = 80
   const plotPadLeft = 16
   const plotPadRight = 16
-  const rowHeight = 40
+  const rowHeight = 48
   const dotRadius = 6
   const ciLineWidth = 2
   const headerHeight = 36
@@ -229,7 +244,15 @@ export const DSForestPlot = ({
               fontWeight={isSelected ? 700 : 400}
               fill={isSelected ? '#1d4ed8' : '#374151'}
             >
-              {row.label}
+              {wrapLabel(row.label).map((line, lineIndex, lines) => (
+                <tspan
+                  key={lineIndex}
+                  x={labelWidth - 8}
+                  dy={lineIndex === 0 ? (lines.length > 1 ? -3 : 0) : 12}
+                >
+                  {line}
+                </tspan>
+              ))}
             </text>
 
             {/* CI line */}
