@@ -2,6 +2,9 @@ import {
   DSQuintilBarChart
 } from "./chunk-D3H6AGO3.mjs";
 import {
+  DSRadarChart
+} from "./chunk-ZR6A7I6K.mjs";
+import {
   DSScatterChart
 } from "./chunk-K6K2S3TJ.mjs";
 import {
@@ -34,5 +37,6 @@ export {
   DSLineChart,
   DSMap,
   DSQuintilBarChart,
+  DSRadarChart,
   DSScatterChart
 };
