@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Legend,
   PolarAngleAxis,
   PolarGrid,
   PolarRadiusAxis,
@@ -16,8 +17,37 @@ export interface RadarChartDatum {
   value: number
 }
 
+export interface DSRadarSeries {
+  /** Key of this series' value in each data row */
+  dataKey: string
+  /** Legend and tooltip label */
+  name: string
+  color: string
+  /** SVG dash pattern: '8 4' dashed, '2 4' dotted. Omit for a solid line. */
+  strokeDasharray?: string
+  /** Default 2 */
+  strokeWidth?: number
+  /** Default 0 */
+  fillOpacity?: number
+}
+
+/** One row per spoke: `label`, plus one value per series `dataKey`. */
+export type RadarChartRow = { label: string } & Record<
+  string,
+  string | number | null
+>
+
 export interface DSRadarChartProps {
-  data: RadarChartDatum[]
+  /** RadarChartDatum[] still fits */
+  data: RadarChartRow[]
+  /** One <Radar> per series. When set, `name`, `color` and `fillOpacity` are ignored */
+  series?: DSRadarSeries[]
+  /** Default: true when there are 2 or more series */
+  showLegend?: boolean
+  /** `dataKey` of the series to emphasize; the others are drawn at 30% opacity */
+  highlightKey?: string
+  /** Formats values in the tooltip */
+  valueFormatter?: (value: number) => string
   /** Series name shown in the tooltip */
   name?: string
   /** Radius axis domain. Defaults to recharts' automatic domain. */
@@ -36,8 +66,26 @@ export interface DSRadarChartProps {
   className?: string
 }
 
+const singleSeries = (
+  name: string | undefined,
+  color: string,
+  fillOpacity: number,
+): DSRadarSeries[] => [
+  {
+    dataKey: 'value',
+    name: name ?? 'value',
+    color,
+    fillOpacity,
+    strokeWidth: 1,
+  },
+]
+
 export const DSRadarChart = ({
   data,
+  series,
+  showLegend,
+  valueFormatter,
+  highlightKey,
   name,
   domain,
   color = '#8884d8',
@@ -51,6 +99,12 @@ export const DSRadarChart = ({
   className,
 }: DSRadarChartProps) => {
   const fixedSize = width !== undefined && height !== undefined
+  const radars = series ?? singleSeries(name, color, fillOpacity)
+  const legend = showLegend ?? (series !== undefined && series.length >= 2)
+  const formatValue = valueFormatter
+    ? (value: unknown) =>
+        typeof value === 'number' ? valueFormatter(value) : String(value)
+    : undefined
 
   const chart = (
     <RadarChart
@@ -69,15 +123,27 @@ export const DSRadarChart = ({
         domain={domain}
         tick={radiusTickFontSize ? { fontSize: radiusTickFontSize } : true}
       />
-      <Tooltip />
-      <Radar
-        name={name}
-        dataKey="value"
-        stroke={color}
-        fill={color}
-        fillOpacity={fillOpacity}
-        isAnimationActive={animate}
-      />
+      <Tooltip formatter={formatValue} />
+      {legend && <Legend />}
+      {radars.map((radar) => {
+        const dimmed =
+          highlightKey !== undefined && highlightKey !== radar.dataKey
+        return (
+          <Radar
+            key={radar.dataKey}
+            name={radar.name}
+            dataKey={radar.dataKey}
+            stroke={radar.color}
+            fill={radar.color}
+            fillOpacity={(radar.fillOpacity ?? 0) * (dimmed ? 0.3 : 1)}
+            strokeOpacity={dimmed ? 0.3 : 1}
+            strokeWidth={radar.strokeWidth ?? 2}
+            strokeDasharray={radar.strokeDasharray}
+            legendType={series ? 'plainline' : undefined}
+            isAnimationActive={animate}
+          />
+        )
+      })}
     </RadarChart>
   )
 

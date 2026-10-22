@@ -3,7 +3,7 @@ import {
 } from "./chunk-D3H6AGO3.mjs";
 import {
   DSRadarChart
-} from "./chunk-ZR6A7I6K.mjs";
+} from "./chunk-QEOJ35RB.mjs";
 import {
   DSScatterChart
 } from "./chunk-K6K2S3TJ.mjs";

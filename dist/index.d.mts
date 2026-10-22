@@ -7,5 +7,5 @@ export { CILineChartDataPoint, CILineChartProps, DSCILineChart } from './ci-line
 export { DSForestPlot, ForestPlotProps, ForestPlotRow } from './forest-plot.mjs';
 export { DSMap, MapProps } from './map.mjs';
 export { DSScatterChart, DSScatterChartProps, ScatterPoint } from './scatter-chart.mjs';
-export { DSRadarChart, DSRadarChartProps, RadarChartDatum } from './radar-chart.mjs';
+export { DSRadarChart, DSRadarChartProps, DSRadarSeries, RadarChartDatum, RadarChartRow } from './radar-chart.mjs';
 import 'react';
