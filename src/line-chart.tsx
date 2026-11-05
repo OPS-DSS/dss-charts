@@ -11,10 +11,10 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import type {
-  NameType,
-  Payload,
-  ValueType,
-} from 'recharts/types/component/DefaultTooltipContent'
+  DotItemDotProps,
+  TooltipContentProps,
+  TooltipValueType,
+} from 'recharts'
 
 export interface LineChartData {
   [key: string]: string | number
@@ -37,11 +37,10 @@ export interface LineChartProps {
   highlightX?: string | number
 }
 
-interface DSChartTooltipContentProps {
-  active?: boolean
-  payload?: Array<Payload<ValueType, NameType>>
-  label?: string | number
-}
+type DSChartTooltipContentProps = Pick<
+  TooltipContentProps,
+  'active' | 'payload' | 'label'
+>
 
 const DSChartTooltipContent = ({
   active,
@@ -50,7 +49,7 @@ const DSChartTooltipContent = ({
 }: DSChartTooltipContentProps) => {
   if (!active || !payload || payload.length === 0) return null
 
-  const getNumericValue = (value: ValueType | undefined) => {
+  const getNumericValue = (value: TooltipValueType | undefined) => {
     const raw = Array.isArray(value) ? value[0] : value
     const n = typeof raw === 'number' ? raw : Number(raw)
     return Number.isFinite(n) ? n : null
@@ -62,6 +61,12 @@ const DSChartTooltipContent = ({
   })
 
   if (visible.length === 0) return null
+
+  // In recharts 3, `dataKey` can also be an accessor function
+  const entryLabel = (entry: (typeof visible)[number]) =>
+    entry.name ??
+    (typeof entry.dataKey === 'function' ? undefined : entry.dataKey)
+
   return (
     <div
       style={{
@@ -76,10 +81,10 @@ const DSChartTooltipContent = ({
       <p style={{ marginBottom: '0.25em', fontWeight: 600 }}>{label}</p>
       {visible.map((entry, index) => (
         <p
-          key={String(entry.dataKey ?? entry.name ?? index)}
+          key={String(entryLabel(entry) ?? index)}
           style={{ color: entry.color, margin: '0.1em 0' }}
         >
-          {entry.name ?? entry.dataKey}:{' '}
+          {entryLabel(entry)}:{' '}
           {getNumericValue(entry.value)?.toFixed(2)}
         </p>
       ))}
@@ -99,7 +104,10 @@ export const DSLineChart = ({
   highlightX,
 }: LineChartProps) => {
   return (
-    <ResponsiveContainer width={width} height={height}>
+    <ResponsiveContainer
+      width={width as number | `${number}%`}
+      height={height}
+    >
       <LineChart
         data={data}
         margin={{
@@ -149,14 +157,15 @@ export const DSLineChart = ({
             name={line.name}
             stroke={line.color}
             strokeWidth={2}
-            dot={(props: {
-              cx: number
-              cy: number
-              stroke: string
-              payload: LineChartData
-            }) => {
-              const { cx, cy, stroke, payload } = props
-              if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
+            dot={(props: DotItemDotProps) => {
+              const { cx, cy, stroke } = props
+              const payload = props.payload as LineChartData
+              if (
+                cx === undefined ||
+                cy === undefined ||
+                !Number.isFinite(cx) ||
+                !Number.isFinite(cy)
+              ) {
                 return <g key={String(payload[xAxisKey])} />
               }
               const isHighlighted =

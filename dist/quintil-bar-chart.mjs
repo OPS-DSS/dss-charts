@@ -1,7 +1,7 @@
 "use client";
 import {
   DSQuintilBarChart
-} from "./chunk-D3H6AGO3.mjs";
+} from "./chunk-DV2FLBMZ.mjs";
 export {
   DSQuintilBarChart
 };

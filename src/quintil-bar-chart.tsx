@@ -124,7 +124,7 @@ export const DSQuintilBarChart = ({
           <LabelList
             dataKey="tasa_ponderada"
             position="top"
-            formatter={(v: number) => v.toFixed(1)}
+            formatter={(v) => Number(v).toFixed(1)}
             style={{ fontSize: '0.75em', fill: '#374151' }}
           />
         </Bar>

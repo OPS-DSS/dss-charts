@@ -125,7 +125,7 @@ var DSQuintilBarChart = ({
                 {
                   dataKey: "tasa_ponderada",
                   position: "top",
-                  formatter: (v) => v.toFixed(1),
+                  formatter: (v) => Number(v).toFixed(1),
                   style: { fontSize: "0.75em", fill: "#374151" }
                 }
               )
